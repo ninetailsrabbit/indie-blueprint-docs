@@ -81,10 +81,6 @@ enum DaltonismTypes {
 func _enter_tree() -> void:
 	get_tree().root.size_changed.connect(on_size_changed)
 	
-## This callback center the screen when the display resolution is changed in-game
-func on_size_changed() -> void:
-	center_window_position()
-
 
 #region Resolution getters
 func get_mobile_resolutions(use_computer_screen_limit: bool = false) -> Array[Vector2i]:
@@ -204,4 +200,11 @@ func adapt_parallax_to_vertical_viewport(parallax: Parallax2D, viewport: Rect2 =
 		sprite.scale = Vector2.ONE * (viewport.size.x / texture_size.x)
 		
 		parallax.repeat_size = Vector2(0, texture_size.y * sprite.scale.y)
+#endregion
+
+
+#region Signal callbacks
+## This callback center the screen when the display resolution is changed in-game
+func on_size_changed() -> void:
+	center_window_position()
 #endregion

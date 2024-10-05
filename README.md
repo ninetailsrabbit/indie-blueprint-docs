@@ -4,7 +4,7 @@
 <h3 align="center">Indie Blueprint</h3>
 
   <p align="center">
-	This blueprint includes essential features, optimized settings, and best practices to help you create amazing indie game
+	This blueprint includes essential features, optimized settings, and best practices to help you create amazing indie games
 	<br />
 	·
 	<a href="https://github.com/indiepipeline/indie-blueprint/issues/new?assignees=ninetailsrabbit&labels=%F0%9F%90%9B+bug&projects=&template=bug_report.md&title=">Report Bug</a>
