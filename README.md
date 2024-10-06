@@ -18,24 +18,27 @@
 
 - [Create a new repository from template](#create-a-new-repository-from-template)
 - [Configuration](#configuration)
-	- [Default bus layout](#default-bus-layout)
-	- [Input map](#input-map)
-	- [Physics layers 2D \& 3D](#physics-layers-2d--3d)
+  - [Default bus layout](#default-bus-layout)
+  - [Input map](#input-map)
+  - [Physics layers 2D \& 3D](#physics-layers-2d--3d)
 - [Autoloads](#autoloads)
-	- [GameGlobals \& GlobalGameEvents](#gameglobals--globalgameevents)
-	- [WindowManager](#windowmanager)
-		- [Resolutions](#resolutions)
-		- [Screen methods](#screen-methods)
-		- [Screenshot](#screenshot)
-		- [Parallax](#parallax)
+  - [GameGlobals \& GlobalGameEvents](#gameglobals--globalgameevents)
+  - [WindowManager](#windowmanager)
+    - [Resolutions](#resolutions)
+    - [Screen methods](#screen-methods)
+    - [Screenshot](#screenshot)
+    - [Parallax](#parallax)
 - [Utilities](#utilities)
-	- [File handling](#file-handling)
-		- [How to use](#how-to-use)
-	- [Geometry](#geometry)
-	- [Hardware detector](#hardware-detector)
-		- [Device/OS detection](#deviceos-detection)
-		- [Exports](#exports)
-		- [Auto-Discover quality preset](#auto-discover-quality-preset)
+  - [File handling](#file-handling)
+    - [How to use load_csv](#how-to-use-load_csv)
+  - [Geometry](#geometry)
+  - [Hardware detector](#hardware-detector)
+    - [Device/OS detection](#deviceos-detection)
+    - [Exports](#exports)
+    - [Auto-Discover quality preset](#auto-discover-quality-preset)
+  - [Input](#input)
+    - [InputHelper](#inputhelper)
+    - [TransformedInput](#transformedinput)
 
 # Create a new repository from template
 
@@ -273,7 +276,7 @@ This function loads a CSV/TSV file from the specified path and returns the parse
 - **Variant:** The parsed CSV data can be either an array of dictionaries _(if as_dictionary is true)_ or an array of arrays.
 - **ERR_PARSE_ERROR (int):** This error code is returned if there are issues opening the file, parsing the CSV data, or encountering data inconsistencies.
 
-### How to use
+### How to use load_csv
 
 For this example was used the `currency.csv` that you can find in [this website](https://wsform.com/knowledgebase/sample-csv-files/)
 
@@ -421,7 +424,7 @@ static var graphics_quality_presets: Dictionary = {
 			//...
 		]
 
-// Information classes to retrieve the settings configuration
+// Information classes structure  returned as settings configuration on the dictionary
 class GraphicQualityPreset:
 	var description: String = ""
 	var quality: Array[GraphicQualityDisplay]
@@ -442,6 +445,137 @@ class GraphicQualityDisplay:
 		property_name = _property_name
 		enabled = _enabled
 		available_text = _available_text
-
-
 ```
+
+## Input
+
+### InputHelper
+
+This section introduces the `InputHelper`, a collection of helpful functions for handling common input-related tasks in your game. It acts as a shortcut to avoid repetitive code for frequently used input checks.
+
+`is_mouse_visible() -> bool`
+
+Return if the current mouse input mode is visible
+
+`is_mouse_captured() -> bool`
+
+Return if the current mouse input mode is captured
+
+`show_mouse_cursor() -> void`
+
+Change the current mouse mode to show the cursor
+
+`show_mouse_cursor_confined() -> void`
+
+Change the current mouse mode to confined
+
+`capture_mouse() -> void`
+
+Change the current mouse mode to captured
+
+`hide_mouse_cursor() -> void`
+
+Change the current mouse mode to hide
+
+`hide_mouse_cursor_confined() -> void`
+
+Change the current mouse mode to hide confined
+
+` is_mouse_button(event: InputEvent) -> bool`
+
+Quickly checks if the event is a mouse button
+
+`is_mouse_left_click(event: InputEvent) -> bool`
+
+Quickly checks if the left mouse button was clicked in the given InputEvent.
+
+`is_mouse_right_click(event: InputEvent) -> bool`
+
+Similar to **is_mouse_left_click**, but checks for the right mouse button click.
+
+`is_mouse_left_button_pressed(event: InputEvent) -> bool`
+
+Quickly check if the left mouse button is keep pressed
+
+`is_mouse_right_button_pressed(event: InputEvent) -> bool`
+
+Quickly check if the right mouse button is keep pressed
+
+`numeric_key_pressed(event: InputEvent) -> bool`
+
+Determines if a numeric key _(including numpad keys)_ was pressed in the `InputEvent`.
+
+`readable_key(key: InputEventKey)`
+
+Translates a raw InputEventKey into a human-readable string representation. This is useful for displaying what key was pressed, including modifiers like "ctrl" or "shift" and physical key names.
+
+```bash
+## Basic example
+func _input(event: InputEvent):
+	if event is InputEventKey:
+	   InputHelper.readable_key(event)
+		# Display the pressed key combination (e.g., "ctrl + alt + shift")
+   	   print("Pressed key:", readable_key_text)
+```
+
+`is_controller_button(event: InputEvent) -> bool`
+
+Quickly checks if the event is a controller button _(joypad button)_
+
+`is_controller_axis(event: InputEvent) -> bool`
+
+Quickly checks if the event is a controller motion _(joypad motion)_
+
+`is_gamepad_input(event: InputEvent) -> bool`
+
+Check if the current input comes from gamepad. It's a combination of **is_controller_button** and **is_controller_axis**
+
+`release_input_actions(actions: Array[StringName] = [])`
+
+Releases held input actions. This is useful for situations where you want to interrupt a continuously held input, such as canceling a cinematic trigger, ending a time stop effect, or breaking a player stun.
+
+`is_any_action_just_pressed(actions: Array, event: InputEvent = null):`
+
+This powerful function checks if any of the actions listed in the provided actions array were just pressed in the InputEvent. This can simplify handling multiple key or button presses simultaneously.
+
+`action_just_pressed_and_exists(action: String) -> bool:`
+
+This function checks if the action exists in the `InputMap` and is just pressed. The static class `Input` is used directly so this function only needs the input action name.
+
+`action_pressed_and_exists(action: String, event: InputEvent = null) -> bool:`
+
+This function checks if the action exists in the `InputMap` and is pressed. This one can receiev an `InputEvent` as it's being used the `event.is_action_pressed`
+
+`is_any_action_pressed(actions: Array, event:InputEvent = null):`
+
+Similar to `is_any_action_just_pressed`, but checks if any of the actions in the array are currently being held down (pressed).
+
+`is_any_action_just_released actions: Array, event: InputEvent = null):`
+
+This function checks if any of the actions in the actions array were just released in the InputEvent. This can be useful for detecting when a player lets go of a key or button.
+
+`is_any_action_released(actions: Array, event: InputEvent)`
+
+This function checks if any of the actions in the actions array were released in the InputEvent. This can be useful for detecting when a player lets go of a key or button.
+
+`get_all_inputs_for_action(action: String) -> Array[InputEvent]`
+
+Get all input events defined in the `InputMap` for the given action name, returns an empty array if the action does not exist.
+
+`get_keyboard_inputs_for_action(action: String) -> Array[InputEvent]`
+
+Get all keyboard input events defined in the `InputMap` for the given action name, returns an empty array if the action does not exist.
+
+`get_keyboard_input_for_action(action: String) -> InputEvent`
+
+Get the first keyboard input for the given action that exists in the `InputMap`
+
+`get_joypad_inputs_for_action(action: String) -> Array[InputEvent]`
+
+Get all joypad input events defined in the `InputMap` for the given action name, returns an empty array if the action does not exist.
+
+`get_joypad_input_for_action(action: String) -> InputEvent`
+
+Get the first joypad input for the given action that exists in the `InputMap`
+
+### TransformedInput
