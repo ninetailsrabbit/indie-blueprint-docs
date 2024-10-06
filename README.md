@@ -1,5 +1,5 @@
 <div align="center">
-	<img src="template/icon.svg" alt="Logo" width="160" height="160">
+	<img src="icon.svg" alt="Logo" width="160" height="160">
 
 <h3 align="center">Indie Blueprint</h3>
 
@@ -16,53 +16,23 @@
 <br>
 <br>
 
-- [Download the template](#download-the-template)
-  - [Clone with git in your system](#clone-with-git-in-your-system)
-  - [(Alternative) Download the template as zip from the code tab of this repo an extract it](#alternative-download-the-template-as-zip-from-the-code-tab-of-this-repo-an-extract-it)
-  - [(Advanced) Download only the "template" folder using sparse checkout](#advanced-download-only-the-template-folder-using-sparse-checkout)
-- [Import the content of the folder "template" as Godot project](#import-the-content-of-the-folder-template-as-godot-project)
+- [Create a new repository from template](#create-a-new-repository-from-template)
 - [Configuration](#configuration)
-  - [Default bus layout](#default-bus-layout)
-  - [Input map](#input-map)
-  - [Physics layers 2D \& 3D](#physics-layers-2d--3d)
+	- [Default bus layout](#default-bus-layout)
+	- [Input map](#input-map)
+	- [Physics layers 2D \& 3D](#physics-layers-2d--3d)
 - [Autoloads](#autoloads)
-  - [GameGlobals \& GlobalGameEvents](#gameglobals--globalgameevents)
+	- [GameGlobals \& GlobalGameEvents](#gameglobals--globalgameevents)
+	- [WindowManager](#windowmanager)
+		- [Resolutions](#resolutions)
 
-# Download the template
+# Create a new repository from template
 
-## Clone with git in your system
+Go to the [template](https://github.com/indie-pipeline/indie-blueprint) and create a new repository from it
 
-```bash
-git clone https://github.com/ninetailsrabbit/indie-blueprint.git
-```
-
-or
-
-## (Alternative) Download the template as zip from the code tab of this repo an extract it
-
-![download_as_zip](images/download_zip.png)
+![use_template](images/use_template.png)
 
 ---
-
-## (Advanced) Download only the "template" folder using sparse checkout
-
-You need version at least the minimum git version `2.25.0` to use the sparse checkout
-
-```bash
-git clone -n --depth=1 --filter=tree:0 https://github.com/indie-pipeline/indie-blueprint
-cd indie-blueprint
-git sparse-checkout set --no-cone template
-git checkout
-
-```
-
----
-
-# Import the content of the folder "template" as Godot project
-
-Import the template as Godot project
-
-![import_godot_project](images/import_godot.png)
 
 # Configuration
 
@@ -85,8 +55,8 @@ There is a default bus layout to use in your project that are sufficient for any
 
 This project comes with very simple predefined input maps to avoid interfering with your game in a tedious way
 
-- WASD movement with the keys `move_forward`, `move_back`, `move_right`, `move_left`
-- WASD keys as been added to the existing ui input maps `ui_up`, `ui_down`, `ui_right`, `ui_left`
+- `WASD` movement with the keys `move_forward`, `move_back`, `move_right`, `move_left`
+- `WASD` keys as been added to the existing ui input maps `ui_up`, `ui_down`, `ui_right`, `ui_left`
 - The input action `debug_metrics` **_Shift+P_** opens the performance metrics when `hardware_information.tscn` it's on the scene tree
 
 ## Physics layers 2D & 3D
@@ -118,28 +88,86 @@ const hitboxes_collision_layer: int = 8
 #endregion
 
 
-#region General helpers
-
-// Example with lambda -> Utilities.delay_func(func(): print("test"), 1.5)
-// Example with arguments -> Utilities.delay_func(print_text.bind("test"), 2.0)
-func delay_func(callable: Callable, time: float, deferred: bool = true)
-
-#endregion
-
 ```
 
 `GlobalGameEvents` contains all the global signals by which any node or script can connect. It contains few basic ones and this is where you should place those events that you want multiple nodes to listen to
 
+## WindowManager
+
+One of the most important and allows you to have control of the game windows as well as resolution information, take screenshots and much more.
+
+**By default**, it's connected to the `size_changed` signal of the `root` node to center the monitor screen automatically when a resolution it's changed.
+
+### Resolutions
+
+There is multiple constants defined in this manager to get the resolutions from a specific aspect-ratio, this are:
+
 ```swift
-extends Node
+// Use the built-in methods to get resolutions, this methods support a boolean variable to limit the resolutions based on the player current monitor
+WindowManager.get_mobile_resolutions()
+WindowManager.get_4_3_resolutions()
+WindowManager.get_16_9_resolutions()
+WindowManager.get_16_10_resolutions()
+WindowManager.get_21_9_resolutions()
 
-#region Narrative
+// List of available resolutions
+var resolutions: Dictionary = {
+	Resolution_Mobile: [
+		Vector2i(320, 480),  # Older smartphones
+		Vector2i(320, 640),
+		Vector2i(375, 667),  # Older smartphones
+		Vector2i(375, 812),
+		Vector2i(390, 844),  # Older smartphones
+		Vector2i(414, 896),  # Some Iphone models
+		Vector2i(480, 800),  # Older smartphones
+		Vector2i(640, 960),  # Some Iphone models
+		Vector2i(640, 1136), # Some Iphone models
+		Vector2i(750, 1334), # Common tablet resolution
+		Vector2i(768, 1024),
+		Vector2i(768, 1334),
+		Vector2i(768, 1280),
+		Vector2i(1080, 1920), # Some Iphone models
+		Vector2i(1242, 2208), # Mid-range tables
+		Vector2i(1536, 2048), # High resolutions in larger tablets and some smartphones
 
-#signal dialogues_requested(dialogue_blocks: Array[DialogueDisplayer.DialogueBlock])
-#signal dialogue_display_started(dialogue: DialogueDisplayer.DialogueBlock)
-#signal dialogue_display_finished(dialogue: DialogueDisplayer.DialogueBlock)
-#signal dialogue_blocks_started_to_display(dialogue_blocks: Array[DialogueDisplayer.DialogueBlock])
-#signal dialogue_blocks_finished_to_display()
+	],
+	Resolution4_3: [
+	  	Vector2i(320, 180),
+	   	Vector2i(512, 384),
+		Vector2i(768, 576),
+		Vector2i(1024, 768),
+	],
+	Resolution16_9: [
+	  	Vector2i(320, 180),
+		Vector2i(400, 224),
+		Vector2i(640, 360),
+		Vector2i(960, 540),
+		Vector2i(1280, 720), # 720p
+		Vector2i(1280, 800), # SteamDeck
+		Vector2i(1366, 768),
+		Vector2i(1600, 900),
+		Vector2i(1920, 1080), # 1080p
+		Vector2i(2560, 1440),
+		Vector2i(3840, 2160),
+		Vector2i(5120, 2880),
+		Vector2i(7680, 4320), # 8K
+	],
+	Resolution16_10: [
+		Vector2i(960, 600),
+		Vector2i(1280, 800),
+		Vector2i(1680, 1050),
+		Vector2i(1920, 1200),
+		Vector2i(2560, 1600),
+	],
+	Resolution21_9: [
+	 	Vector2i(1280, 540),
+		Vector2i(1720, 720),
+		Vector2i(2560, 1080),
+		Vector2i(3440, 1440),
+		Vector2i(3840, 2160), # 4K
+		Vector2i(5120, 2880),
+		Vector2i(7680, 4320), # 8K
+	]
+}
 
-#endregion
 ```
