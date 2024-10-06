@@ -25,6 +25,9 @@
 	- [GameGlobals \& GlobalGameEvents](#gameglobals--globalgameevents)
 	- [WindowManager](#windowmanager)
 		- [Resolutions](#resolutions)
+		- [Screen methods](#screen-methods)
+		- [Screenshot](#screenshot)
+		- [Parallax](#parallax)
 
 # Create a new repository from template
 
@@ -171,3 +174,43 @@ var resolutions: Dictionary = {
 }
 
 ```
+
+### Screen methods
+
+`func center_window_position(viewport: Viewport = get_viewport()) -> void`
+
+Center the window position based on the monitor screen _(not the viewport)_. This is called automatically when the `size_changed` signal is emitted so there is no reason to use it individually.
+
+`func screen_center() -> Vector2i`
+
+Get the center of the viewport screen in the world
+
+`func monitor_screen_center() -> Vector2i:`
+
+Center of the current PC screen monitor
+
+`func get_camera2d_frame(viewport: Viewport = get_viewport()) -> Rect2`
+
+Get the frame rect where the current active `Camera2D` is on the screen, useful to see which elements are inside the camera and can be visible.
+
+### Screenshot
+
+`func screenshot(viewport: Viewport) -> Image`
+
+Take a screenshot of the current viewport and return it as an [Image](https://docs.godotengine.org/en/stable/classes/class_image.html) class
+
+`func screenshot_to_texture_rect(viewport: Viewport, texture_rect: TextureRect = TextureRect.new()) -> TextureRect`
+
+Take a screenshot of the current viewport and insert it as a texture into a [TextureRect](https://docs.godotengine.org/en/stable/classes/class_texturerect.html) node
+
+### Parallax
+
+These methods automatically adapt the appropriate parallax size according to the current screen resolution. It supports the old [ParallaxBackground](https://docs.godotengine.org/en/stable/classes/class_parallaxbackground.html) and the new [Parallax2D](https://docs.godotengine.org/en/stable/classes/class_parallax2d.html)
+
+`func adapt_parallax_background_to_horizontal_viewport(parallax_background: ParallaxBackground, viewport: Rect2 = get_window().get_visible_rect()) -> void`
+
+`func adapt_parallax_background_to_vertical_viewport(parallax_background: ParallaxBackground, viewport: Rect2 = get_window().get_visible_rect()) -> void`
+
+`func adapt_parallax_to_horizontal_viewport(parallax: Parallax2D, viewport: Rect2 = get_window().get_visible_rect()) -> void`
+
+`func adapt_parallax_to_vertical_viewport(parallax: Parallax2D, viewport: Rect2 = get_window().get_visible_rect()) -> void`
