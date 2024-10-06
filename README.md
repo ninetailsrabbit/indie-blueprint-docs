@@ -28,6 +28,14 @@
 		- [Screen methods](#screen-methods)
 		- [Screenshot](#screenshot)
 		- [Parallax](#parallax)
+- [Utilities](#utilities)
+	- [File handling](#file-handling)
+		- [How to use](#how-to-use)
+	- [Geometry](#geometry)
+	- [Hardware detector](#hardware-detector)
+		- [Device/OS detection](#deviceos-detection)
+		- [Exports](#exports)
+		- [Auto-Discover quality preset](#auto-discover-quality-preset)
 
 # Create a new repository from template
 
@@ -177,29 +185,29 @@ var resolutions: Dictionary = {
 
 ### Screen methods
 
-`func center_window_position(viewport: Viewport = get_viewport()) -> void`
+`center_window_position(viewport: Viewport = get_viewport()) -> void`
 
 Center the window position based on the monitor screen _(not the viewport)_. This is called automatically when the `size_changed` signal is emitted so there is no reason to use it individually.
 
-`func screen_center() -> Vector2i`
+`screen_center() -> Vector2i`
 
 Get the center of the viewport screen in the world
 
-`func monitor_screen_center() -> Vector2i:`
+`monitor_screen_center() -> Vector2i:`
 
 Center of the current PC screen monitor
 
-`func get_camera2d_frame(viewport: Viewport = get_viewport()) -> Rect2`
+`get_camera2d_frame(viewport: Viewport = get_viewport()) -> Rect2`
 
 Get the frame rect where the current active `Camera2D` is on the screen, useful to see which elements are inside the camera and can be visible.
 
 ### Screenshot
 
-`func screenshot(viewport: Viewport) -> Image`
+`screenshot(viewport: Viewport) -> Image`
 
 Take a screenshot of the current viewport and return it as an [Image](https://docs.godotengine.org/en/stable/classes/class_image.html) class
 
-`func screenshot_to_texture_rect(viewport: Viewport, texture_rect: TextureRect = TextureRect.new()) -> TextureRect`
+`screenshot_to_texture_rect(viewport: Viewport, texture_rect: TextureRect = TextureRect.new()) -> TextureRect`
 
 Take a screenshot of the current viewport and insert it as a texture into a [TextureRect](https://docs.godotengine.org/en/stable/classes/class_texturerect.html) node
 
@@ -207,10 +215,233 @@ Take a screenshot of the current viewport and insert it as a texture into a [Tex
 
 These methods automatically adapt the appropriate parallax size according to the current screen resolution. It supports the old [ParallaxBackground](https://docs.godotengine.org/en/stable/classes/class_parallaxbackground.html) and the new [Parallax2D](https://docs.godotengine.org/en/stable/classes/class_parallax2d.html)
 
-`func adapt_parallax_background_to_horizontal_viewport(parallax_background: ParallaxBackground, viewport: Rect2 = get_window().get_visible_rect()) -> void`
+`adapt_parallax_background_to_horizontal_viewport(parallax_background: ParallaxBackground, viewport: Rect2 = get_window().get_visible_rect()) -> void`
 
-`func adapt_parallax_background_to_vertical_viewport(parallax_background: ParallaxBackground, viewport: Rect2 = get_window().get_visible_rect()) -> void`
+`adapt_parallax_background_to_vertical_viewport(parallax_background: ParallaxBackground, viewport: Rect2 = get_window().get_visible_rect()) -> void`
 
-`func adapt_parallax_to_horizontal_viewport(parallax: Parallax2D, viewport: Rect2 = get_window().get_visible_rect()) -> void`
+`adapt_parallax_to_horizontal_viewport(parallax: Parallax2D, viewport: Rect2 = get_window().get_visible_rect()) -> void`
 
-`func adapt_parallax_to_vertical_viewport(parallax: Parallax2D, viewport: Rect2 = get_window().get_visible_rect()) -> void`
+`adapt_parallax_to_vertical_viewport(parallax: Parallax2D, viewport: Rect2 = get_window().get_visible_rect()) -> void`
+
+# Utilities
+
+General utilities that does not belongs to a particular place and are sed as static classes that can be accessed at any time even if they are not in the scene tree.
+
+## File handling
+
+The `FileHelper` class provides static methods to work with file extensions mainly parsing or retrieving metadata.
+
+---
+
+`filepath_is_valid(path: String) -> bool`
+
+Validate a file path to know if the file is in good condition and is accessible to operate with it.
+
+`dirpath_is_valid(path: String) -> bool`
+
+Validate a directory path to know if the file is in good condition and is accessible to operate with it.
+
+`directory_exist_on_executable_path(directory_path: String) -> bool`
+
+Validate a directory path where the godot executable folder is.
+
+`get_files_recursive(path: String, regex: RegEx = null) -> Array`
+
+Get all the files recursively on the path provided, a `RegEx` can be passed to filter the files to retrieve.
+
+`copy_directory_recursive(from_dir :String, to_dir :String) -> Error`
+
+Copy content of a folder recursively into another overwrite existing files on the process.
+
+`remove_files_recursive(path: String, regex: RegEx = null) -> Error`
+
+Remove all the files recursively on the path provided, a `RegEx` can be passed to filter what files to delete.
+
+`static func get_pck_files(path: String) -> Array`
+
+This is actually a shortcut to retrieve all the `.pck` files on a folder but uses `get_files_recursive` with a `RegEx` behind the scenes.
+
+`load_csv(path: String, as_dictionary: bool = true): Variant`
+
+This function loads a CSV/TSV file from the specified path and returns the parsed data, when `as_dictionary` is false the first array will be the columns. Although the function name only includes `.csv` it also supports `.tsv` files that separate by tabs instead of commas
+
+- **path (String):** The absolute path to the CSV/TSV file.
+- **as_dictionary (bool, optional):** Defaults to true. When set to true, the function attempts to convert the parsed data into an array of dictionaries, using the first line of the CSV as column headers. If false, the function returns an array of arrays, where each inner array represents a row of data where the first row are the column headers.
+
+**Returns:**
+
+- **Variant:** The parsed CSV data can be either an array of dictionaries _(if as_dictionary is true)_ or an array of arrays.
+- **ERR_PARSE_ERROR (int):** This error code is returned if there are issues opening the file, parsing the CSV data, or encountering data inconsistencies.
+
+### How to use
+
+For this example was used the `currency.csv` that you can find in [this website](https://wsform.com/knowledgebase/sample-csv-files/)
+
+```bash
+for line in FileHelper.load_csv("res://currency.csv", false):
+		print_rich("ARRAY LINE ", line)
+
+## Output of
+[
+	ARRAY LINE ["Code", "Symbol", "Name"] # Headers
+	ARRAY LINE ["AED", "د.إ", "United Arab Emirates d"]
+	ARRAY LINE ["AFN", "؋", "Afghan afghani"]
+	ARRAY LINE ["ALL", "L", "Albanian lek"]
+	ARRAY LINE ["AMD", "AMD", "Armenian dram"]
+	ARRAY LINE ["ANG", "ƒ", "Netherlands Antillean gu"]
+	ARRAY LINE ["AOA", "Kz", "Angolan kwanza"]
+	ARRAY LINE ["ARS", "$", "Argentine peso"]
+	ARRAY LINE ["AUD", "$", "Australian dollar"]
+	ARRAY LINE ["AWG", "Afl.", "Aruban florin"]
+	ARRAY LINE ["AZN", "AZN", "Azerbaijani manat"]
+	ARRAY LINE ["BAM", "KM", "Bosnia and Herzegovina "]
+	## ....
+]
+
+for line in FileHelper.load_csv("res://currency.csv"):
+	print_rich("DICT LINE ", line)
+
+## Output of
+[
+	DICT LINE { "Code": "AED", "Symbol": "د.إ", "Name": "United Arab Emirates d" }
+	DICT LINE { "Code": "AFN", "Symbol": "؋", "Name": "Afghan afghani" }
+	DICT LINE { "Code": "ALL", "Symbol": "L", "Name": "Albanian lek" }
+	DICT LINE { "Code": "AMD", "Symbol": "AMD", "Name": "Armenian dram" }
+	DICT LINE { "Code": "ANG", "Symbol": "ƒ", "Name": "Netherlands Antillean gu" }
+	DICT LINE { "Code": "AOA", "Symbol": "Kz", "Name": "Angolan kwanza" }
+	DICT LINE { "Code": "ARS", "Symbol": "$", "Name": "Argentine peso" }
+	DICT LINE { "Code": "AUD", "Symbol": "$", "Name": "Australian dollar" }
+	DICT LINE { "Code": "AWG", "Symbol": "Afl.", "Name": "Aruban florin" }
+	DICT LINE { "Code": "AZN", "Symbol": "AZN", "Name": "Azerbaijani manat" }
+	DICT LINE { "Code": "BAM", "Symbol": "KM", "Name": "Bosnia and Herzegovina " }
+]
+```
+
+## Geometry
+
+Functions to obtain information on sizes, measurements or to draw specific shapes
+
+---
+
+`get_random_mesh_surface_position(target: MeshInstance3D) -> Vector3`
+
+Get a random position as `Vector3` on any mesh shape surface
+
+`random_inside_unit_circle(position: Vector2, radius: float = 1.0) -> Vector2`
+
+Get a random position as `Vector2` from the inside of a circle with the given `radius`
+
+`random_on_unit_circle(position: Vector2) -> Vector2`
+
+Get a random position as `Vector2` from a circunference
+
+`random_point_in_rect(rect: Rect2) -> Vector2`
+
+Get a random point as `Vector2` in the provided `Rect2`
+
+`random_point_in_annulus(center, radius_small, radius_large) -> Vector2`
+
+Get a random point as `Vector2` in annulus _(a donut shape)_ with provided `center` and `radius provided`
+
+`polygon_bounding_box(polygon: PackedVector2Array) -> Rect2`
+
+Get the bounding box as `Rect2` from the polygon points provided
+
+## Hardware detector
+
+All the hardware information that we can obtain lives on this class, contains auto-detection of the video adapter to decide which would be the most suitable quality preset for the player as well as other functionalities.
+
+The `QualityPreset` is just an enum that can be used as information
+
+```swift
+enum QualityPreset {
+	Low,
+	Medium,
+	High,
+	Ultra
+}
+
+```
+
+When the game it's ready, a few variables are initialized to access this information quickly
+
+```swift
+
+static var engine_version: String = "Godot %s" % Engine.get_version_info().string
+static var device: String = OS.get_model_name()
+static var platform: String = OS.get_name()
+static var distribution_name: String = OS.get_distribution_name()
+static var video_adapter_name: String = RenderingServer.get_video_adapter_name()
+static var processor_name: String = OS.get_processor_name()
+static var processor_count: int = OS.get_processor_count()
+static var usable_threads: int = processor_count * 2 # I assume that each core has 2 threads
+static var computer_screen_size: Vector2i = DisplayServer.screen_get_size()
+
+```
+
+### Device/OS detection
+
+Useful methods to detect the device on which the game is running and the operating system
+
+---
+
+`is_steam_deck() -> bool`
+
+`is_mobile() -> bool`
+
+`is_windows() -> bool`
+
+`is_linux() -> bool`
+
+`is_mac() -> bool`
+
+`is_web() -> bool`
+
+### Exports
+
+Information related to the game build
+
+`is_multithreading_enabled() -> bool`
+
+`is_exported_release() -> bool`
+
+### Auto-Discover quality preset
+
+With this method you can obtain an accurate quality preset recommended based on the video-adapter player it's using
+
+`auto_discover_graphics_quality() -> QualityPreset`
+
+Based on the `QualityPreset` you can access a bunch of settings that can be changed from the dictionary `graphics_quality_presets` based on the [https://github.com/Calinou/godot-sponza/blob/master/scripts/settings_gui.gd](https://github.com/Calinou/godot-sponza/blob/master/scripts/settings_gui.gd) example:
+
+```swift
+static var graphics_quality_presets: Dictionary = {
+	QualityPreset.Low: GraphicQualityPreset.new("For low-end PCs with integrated graphics, as well as mobile devices",
+		[
+			GraphicQualityDisplay.new("environment/glow_enabled","Glow", 0, "Disabled"),
+			//...
+		]
+
+// Information classes to retrieve the settings configuration
+class GraphicQualityPreset:
+	var description: String = ""
+	var quality: Array[GraphicQualityDisplay]
+
+	func _init(_description:String, _quality: Array[GraphicQualityDisplay] = []) -> void:
+		description = _description
+		quality = _quality
+
+
+class GraphicQualityDisplay:
+	var project_setting: String = ""
+	var property_name: String = ""
+	var enabled: int = 0
+	var available_text: String = ""
+
+	func _init(_project_setting:  String, _property_name: String, _enabled: int, _available_text: String) -> void:
+		project_setting = _project_setting
+		property_name = _property_name
+		enabled = _enabled
+		available_text = _available_text
+
+
+```
