@@ -17,12 +17,16 @@
 <br>
 
 - [Download the template](#download-the-template)
-	- [Clone with git in your system](#clone-with-git-in-your-system)
-	- [(Alternative) Download the template as zip from the code tab of this repo an extract it](#alternative-download-the-template-as-zip-from-the-code-tab-of-this-repo-an-extract-it)
-	- [(Advanced) Download only the "template" folder using sparse checkout](#advanced-download-only-the-template-folder-using-sparse-checkout)
+  - [Clone with git in your system](#clone-with-git-in-your-system)
+  - [(Alternative) Download the template as zip from the code tab of this repo an extract it](#alternative-download-the-template-as-zip-from-the-code-tab-of-this-repo-an-extract-it)
+  - [(Advanced) Download only the "template" folder using sparse checkout](#advanced-download-only-the-template-folder-using-sparse-checkout)
 - [Import the content of the folder "template" as Godot project](#import-the-content-of-the-folder-template-as-godot-project)
 - [Configuration](#configuration)
-	- [Default bus layout](#default-bus-layout)
+  - [Default bus layout](#default-bus-layout)
+  - [Input map](#input-map)
+  - [Physics layers 2D \& 3D](#physics-layers-2d--3d)
+- [Autoloads](#autoloads)
+  - [GameGlobals \& GlobalGameEvents](#gameglobals--globalgameevents)
 
 # Download the template
 
@@ -76,3 +80,66 @@ There is a default bus layout to use in your project that are sufficient for any
 - `Voice`: Dialogues, ai voice effects, breath.
 - `UI`: User interface sounds, button clicks, hover, transition animations, etc.
 - `Ambient`: Ambient sounds like wind, nature, ocean, house interior and other stuff
+
+## Input map
+
+This project comes with very simple predefined input maps to avoid interfering with your game in a tedious way
+
+- WASD movement with the keys `move_forward`, `move_back`, `move_right`, `move_left`
+- WASD keys as been added to the existing ui input maps `ui_up`, `ui_down`, `ui_right`, `ui_left`
+- The input action `debug_metrics` **_Shift+P_** opens the performance metrics when `hardware_information.tscn` it's on the scene tree
+
+## Physics layers 2D & 3D
+
+- `Layer 1`: It's named **World**
+- `Layer 2`: It's named **Player**
+- `Layer 3`: It's named **Enemies**
+- `Layer 4`: It's named **Hitboxes**, `hitboxes` are collision areas that `hurtboxes` detects to implement a damage or impact system.
+
+# Autoloads
+
+A bunch of autoloads are ready to use for common operation in videogames to manage audio, global variables, signals, gamepad support, persistence, etc.
+
+## GameGlobals & GlobalGameEvents
+
+This singletons works to share data across nodes, they are always on the scene tree and can be accesed anywhere.
+
+`GameGlobals` contains the pre-configured physic layer values and is intended to implement here the variables or functions that need to be accessed globally in your game.
+
+```swift
+extends Node
+
+
+#region Physics layers
+const world_collision_layer: int = 1
+const player_collision_layer: int = 2
+const enemies_collision_layer: int = 4
+const hitboxes_collision_layer: int = 8
+#endregion
+
+
+#region General helpers
+
+// Example with lambda -> Utilities.delay_func(func(): print("test"), 1.5)
+// Example with arguments -> Utilities.delay_func(print_text.bind("test"), 2.0)
+func delay_func(callable: Callable, time: float, deferred: bool = true)
+
+#endregion
+
+```
+
+`GlobalGameEvents` contains all the global signals by which any node or script can connect. It contains few basic ones and this is where you should place those events that you want multiple nodes to listen to
+
+```swift
+extends Node
+
+#region Narrative
+
+#signal dialogues_requested(dialogue_blocks: Array[DialogueDisplayer.DialogueBlock])
+#signal dialogue_display_started(dialogue: DialogueDisplayer.DialogueBlock)
+#signal dialogue_display_finished(dialogue: DialogueDisplayer.DialogueBlock)
+#signal dialogue_blocks_started_to_display(dialogue_blocks: Array[DialogueDisplayer.DialogueBlock])
+#signal dialogue_blocks_finished_to_display()
+
+#endregion
+```
