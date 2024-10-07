@@ -1,7 +1,7 @@
 <div align="center">
 	<img src="icon.svg" alt="Logo" width="160" height="160">
 
-<h3 align="center">Indie Blueprint</h3>
+<h3 align="center">Indie Blueprint (WIP)</h3>
 
   <p align="center">
 	This blueprint includes essential features, optimized settings, and best practices to help you create amazing indie games
