@@ -39,6 +39,7 @@
   - [Input](#input)
     - [InputHelper](#inputhelper)
     - [TransformedInput](#transformedinput)
+      - [Example of use](#example-of-use)
 
 # Create a new repository from template
 
@@ -579,3 +580,82 @@ Get all joypad input events defined in the `InputMap` for the given action name,
 Get the first joypad input for the given action that exists in the `InputMap`
 
 ### TransformedInput
+
+This class simplifies handling and transforming player input directions in your Godot games. It provides various properties and functions to access and manipulate input based on your needs.
+
+- **Deadzone Support:** Implements a deadzone to eliminate minor joystick movements or imprecise keyboard inputs around the center _(zero value)_. You can customize the deadzone size using the deadzone property _(default: 0.5)_.
+- **2D and 3D Compatibility:** Works seamlessly with both 2D _(Node2D) and 3D (Node3D)_ actors, allowing you to retrieve input directions in either scene type.
+- **Multiple Input Representations:** Offers access to input directions in various formats:
+  - **Input direction:** Provides a 2D vector representing the raw input direction.
+  - **Input joy direction left/right:** Provides a 2D vector representing the input direction from a gamepad joy.
+  - **Deadzone-applied Direction:** Returns a 2D vector with the deadzone applied, resulting in a more refined input direction.
+  - **Separate Horizontal and Vertical Axes:** Exposes individual values for horizontal and vertical input axes.
+  - **Deadzone-applied Horizontal/Vertical Axes:** Provides separate horizontal and vertical axes with the deadzone applied.
+  - **World Coordinate Space Direction (3D Only):** In 3D scenes, calculates the input direction in the actor's world coordinate space for movement calculations.
+
+A new `TransformedInputn` can receive this parameters on the constructor:
+
+- `actor (Node)`: A reference to the actor _(either Node2D or Node3D)_ from which the input is retrieved.
+- `deadzone (float)`: Controls the deadzone size _(range: 0.0 to 1.0)_. Higher values create a larger deadzone.
+
+The only function you need to use from this class is `update()` that **save the current direction into previous variables** and **update the directions** from the current inputs.
+
+By default it uses this inputs action names that comes preconfigured on this template, if you want to use other names just change the variables or use the set methods `change_move_[DIRECTION]_action(new_action: String)` in the class:
+
+```csharp
+class_name TransformedInput
+
+var move_right_action: String = "move_right"
+var move_left_action: String = "move_left"
+var move_forward_action: String = "move_forward"
+var move_back_action: String = "move_back"
+
+var actor: Node
+var deadzone: float = 0.5:
+	set(value):
+		deadzone = clamp(value, 0.0, 1.0)
+
+var input_direction: Vector2
+var input_direction_deadzone_square_shape: Vector2
+var input_direction_horizontal_axis: float
+var input_direction_vertical_axis: float
+var input_direction_horizontal_axis_applied_deadzone: float
+var input_direction_vertical_axis_applied_deadzone: float
+var input_joy_direction_left: Vector2
+var input_joy_direction_right: Vector2
+var world_coordinate_space_direction: Vector3
+
+var previous_input_direction: Vector2
+var previous_input_direction_deadzone_square_shape: Vector2
+var previous_input_direction_horizontal_axis: float
+var previous_input_direction_vertical_axis: float
+var previous_input_direction_horizontal_axis_applied_deadzone: float
+var previous_input_direction_vertical_axis_applied_deadzone: float
+var previous_input_joy_direction_left: Vector2
+var previous_input_joy_direction_right: Vector2
+var previous_world_coordinate_space_direction: Vector3
+
+//...
+
+```
+
+#### Example of use
+
+```csharp
+class_name FirstPersonController extends CharacterBody3D
+
+var motion_input = TransformedInput.new(self)
+
+## //...
+
+func _physics_process(delta):
+	motion_input.update() // This is the method that updates the direction each frame
+
+	if swing_head and is_on_ground:
+		swing_head_effect.apply(motion_input.input_direction)
+
+	if motion_input.world_coordinate_space_direction.is_zero_approx():
+		velocity = velocity.lerp(Vector3.ZERO, 0.8)
+		## //...
+
+```
