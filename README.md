@@ -7,9 +7,9 @@
 	This blueprint includes essential features, optimized settings, and best practices to help you create amazing indie games
 	<br />
 	·
-	<a href="https://github.com/indie-pipeline/indie-blueprint/issues/new?assignees=ninetailsrabbit&labels=%F0%9F%90%9B+bug&projects=&template=bug_report.md&title=">Report Bug</a>
+	<a href="https://github.com/ninetailsrabbit/indie-blueprint/issues/new?assignees=ninetailsrabbit&labels=%F0%9F%90%9B+bug&projects=&template=bug_report.md&title=">Report Bug</a>
 	·
-	<a href="https://github.com/indie-pipeline/indie-blueprint/issues/new?assignees=ninetailsrabbit&labels=%E2%AD%90+feature&projects=&template=feature_request.md&title=">Request Features</a>
+	<a href="https://github.com/ninetailsrabbit/indie-blueprint/issues/new?assignees=ninetailsrabbit&labels=%E2%AD%90+feature&projects=&template=feature_request.md&title=">Request Features</a>
   </p>
 </div>
 
@@ -43,7 +43,7 @@
 
 # Create a new repository from template
 
-Go to the [template](https://github.com/indie-pipeline/indie-blueprint) and create a new repository from it
+Go to the [template](https://github.com/ninetailsrabbit/indie-blueprint) and create a new repository from it
 
 ![use_template](images/use_template.png)
 
