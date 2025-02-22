@@ -1398,6 +1398,43 @@ func random_value_from(_enum) -> Variant
 The `VectorHelper` class provides a collection of commonly used vector methods that can simplify your everyday game development tasks. While it offers a wide range of functions, in-depth documentation might not be available for every method. However, the method names themselves are designed to be clear and descriptive.
 
 ```csharp
+// This class contains few variables that holds all directions that may be available for quick checks in your game
+
+static var directions_v2: Array[Vector2] = [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]
+static var horizontal_directions_v2: Array[Vector2] = [Vector2.LEFT, Vector2.RIGHT]
+static var vertical_directions_v2: Array[Vector2] = [Vector2.UP, Vector2.DOWN]
+
+static var directions_v3: Array[Vector3] = [
+	Vector3.UP,
+	Vector3.DOWN,
+	Vector3.FORWARD,
+	Vector3.BACK,
+	Vector3.LEFT,
+	Vector3.RIGHT
+]
+
+static var opposite_directions_v2: Dictionary = {
+	Vector2.UP: Vector2.DOWN,
+	Vector2.DOWN: Vector2.UP,
+	Vector2.RIGHT: Vector2.LEFT,
+	Vector2.LEFT: Vector2.RIGHT
+}
+
+static var opposite_directions_v3: Dictionary = {
+  	Vector3.UP: Vector3.DOWN,
+	Vector3.DOWN: Vector3.UP,
+	Vector3.RIGHT: Vector3.LEFT,
+	Vector3.LEFT: Vector3.RIGHT,
+	Vector3.FORWARD: Vector3.BACK,
+	Vector3.BACK: Vector3.FORWARD
+}
+
+
+//This method calculates the opposite of a given upward direction vector in 2D space. For example, if your CharacterBody2D uses Vector2.UP as its up_direction, the opposite would be Vector2.DOWN.
+// --------------
+// This function is useful for applying gravity in the opposite direction of the player, allowing you to create inverted gravity or flipped worlds. Even when your player changes their up direction to Vector2.DOWN, this method will correctly return Vector2.UP so you can set gravity pulls player in that direction.
+up_direction_opposite_vector2(up_direction: Vector2) -> Vector2
+up_direction_opposite_vector3(up_direction: Vector3) -> Vector3
 
 
 ```
