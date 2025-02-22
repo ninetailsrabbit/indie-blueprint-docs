@@ -56,6 +56,13 @@
     - [Node Positioner](#node-positioner)
     - [Node Traversal](#node-traversal)
     - [Node Remover](#node-remover)
+  - [Data structures](#data-structures)
+    - [Array](#array)
+    - [Dictionary](#dictionary)
+    - [Enum](#enum)
+    - [Vector](#vector)
+    - [Semantic version (Semver)](#semantic-version-semver)
+  - [UUID 🔑](#uuid-)
 
 # Create a new repository from template
 
@@ -338,7 +345,7 @@ CollisionHelper.value_to_layer(1024) // Returns 11
 
 The `ColorHelper` class provides an easy way to work with colors. Create gradients and palettes through resources, generate random colors, compare them, etc.
 
-```swift
+```csharp
 const ColorPalettesPath: String = "res://utilities/color/palettes/"
 const GradientsPath: String = "res://utilities/color/gradients/"
 
@@ -358,18 +365,18 @@ enum ColorGenerationMethod {
 generate_random_colors(method: ColorGenerationMethod, number_of_colors: int = 12, saturation: float = 0.5, value: float = 0.95) -> PackedColorArray
 
 // Using ideas from https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
-static func generate_random_hsv_colors(number_of_colors: int = 12, saturation: float = 0.5, value: float = 0.95) -> PackedColorArray
+generate_random_hsv_colors(number_of_colors: int = 12, saturation: float = 0.5, value: float = 0.95) -> PackedColorArray
 
 // Using ideas from https://www.iquilezles.org/www/articles/palettes/palettes.htm
-static func generate_random_rgb_colors(number_of_colors: int = 12, darkened_value: float = 0.2) -> PackedColorArray
+generate_random_rgb_colors(number_of_colors: int = 12, darkened_value: float = 0.2) -> PackedColorArray
 
 // ---------------------
 
 // Compare colors with a tolerance
-static func colors_are_similar(color_a: Color, color_b: Color, tolerance: float = 100.0) -> bool
+colors_are_similar(color_a: Color, color_b: Color, tolerance: float = 100.0) -> bool
 
 // Translates a Vector3 or Vector4 to a valid Color. Returns Color.WHITE by default
-static func color_from_vector(vec) -> Color:
+color_from_vector(vec) -> Color:
 
 
 ```
@@ -1302,11 +1309,168 @@ The `NodeRemover` class helps to simplify operations related to node removal
 // A safe function to remove only valid nodes
 remove(node: Node) -> void
 
-// Both functions help you declutter your scene by removing all child nodes from a parent node. They handle the cleanup process efficiently, so you don't have to write repetitive code.
-//Exceptions are passed as [Area3D.new().get_class)
-//
+// This functions help you declutter your scene by removing all child nodes from a parent node. They handle the cleanup process efficiently, so you don't have to write repetitive code.
+// --- Exceptions are passed as [Area3D.new().get_class) ---
 remove_and_queue_free_children(node: Node) -> void
 queue_free_children(node: Node) -> void
 free_children(node: Node, except: Array = []) -> void:
 
 ```
+
+## Data structures
+
+This classes help to handle known data structures and simplify many operations by abstracting their logic and exposing them as a single function
+
+### Array
+
+The `ArrayHelper` class provides useful functions to work with Arrays and manage complex operations with ease.
+
+```csharp
+sum(values: Array[int]) -> int
+
+sum_floats(values: Array[float]) -> float
+
+repeat(element: Variant, times: int) -> Array[Variant]
+
+// Flatten any array with n dimensions recursively
+flatten(array: Array[Variant])
+
+pick_random_values(array: Array[Variant], items_to_pick: int = 1, duplicates: bool = true) -> Array[Variant]
+
+remove_duplicates(array: Array[Variant]) -> Array[Variant]
+
+remove_falsy_values(array: Array[Variant]) -> Array[Variant]
+
+middle_element(array: Array[Variant])
+
+// This method works in a circular way, this means that is the from value is the last, it returns the first one in the array
+next_element_from_value(array: Array[Variant], value: Variant) -> Variant
+
+// Return a dictionary with the array value as key and the frequency count as value
+frequency(array: Array[Variant]) -> Dictionary
+
+// To detect if a contains elements of b
+intersects(a: Array[Variant], b: Array[Variant]) -> bool
+intersected_elements(a: Array[Variant], b: Array[Variant]) -> Array[Variant]
+
+merge_unique(first: Array[Variant], second: Array[Variant]) -> Array[Variant]
+
+
+// Separates an Array into smaller array:
+// argument 1: array that is going to be converted
+// argument 2: size of these smaller arrays
+// argument 3: writes smaller arrays even if they aren't full
+// -------------
+// Example:
+// ArrayHelper.chunk[[1,2,3,4,5,6,7,8,9], 3]
+// [1,2,3,4,5,6,7,8,9] -> [[1,2,3], [4,5,6], [7,8,9]]
+// -----------
+// Example 2:
+// ArrayHelper.chunk([1,2,3,4,5,6,7,8,9], 4)
+// [1,2,3,4,5,6,7,8,9] -> [[1, 2, 3, 4], [5, 6, 7, 8], [9]]
+chunk(array: Array[Variant], size: int, only_chunks_with_same_size: bool = false)
+```
+
+### Dictionary
+
+The `ArrayHelper` class provides useful functions to work with Dictionaries and manage complex operations with ease.
+
+```csharp
+contain_all_keys(target: Dictionary, keys: Array[String]) -> bool
+
+contain_any_key(target: Dictionary, keys: Array[String]) -> bool
+
+reverse_key_value(source_dict: Dictionary) -> Dictionary
+
+merge_recursive(dest: Dictionary, source: Dictionary) -> void:
+```
+
+### Enum
+
+The `ArrayHelper` class provides useful functions to work with Enums.
+
+```csharp
+func random_value_from(_enum) -> Variant
+```
+
+### Vector
+
+The `VectorHelper` class provides a collection of commonly used vector methods that can simplify your everyday game development tasks. While it offers a wide range of functions, in-depth documentation might not be available for every method. However, the method names themselves are designed to be clear and descriptive.
+
+```csharp
+
+
+```
+
+### Semantic version (Semver)
+
+The `SemanticVersion` class provides a structured way to represent and compare semantic version numbers, following the [Semantic Versioning 2.0.0](https://semver.org/) specification.
+
+- `major, minor, patch`: Integer values representing the major, minor, and patch version numbers, respectively.
+- `state`: An optional string for pre-release or build metadata _(e.g., "-rc.1", "-alpha.2")_
+
+```csharp
+class_name SemanticVersion extends RefCounted
+
+var major: int
+var minor: int
+var patch: int
+
+var state: String = ""
+
+
+_init(_major: int, _minor: int, _patch: int, _state: String = "") -> void
+
+// Parses a string representation of a semantic version number (e.g., "1.2.3") and returns a SemanticVersion object.
+//This method will only parse the major, minor, and patch numbers, and ignore non digit or period characters.
+parse(value: String) -> SemanticVersion
+
+// Compares this SemanticVersion instance with another and returns true if they are equal, false otherwise. Equality is determined by comparing the major, minor, and patch numbers.
+equals(other: SemanticVersion) -> bool
+
+// Compares this SemanticVersion instance with another and returns true if this instance is greater than the other, false otherwise. Comparison follows semantic versioning rules (major > minor > patch). The state variable is not used in the comparison.
+is_greater(other: SemanticVersion) -> bool
+	if major > other.major:
+		return true
+
+	if major == other.major and minor > other.minor:
+		return true
+
+	return major == other.major and minor == other.minor and patch > other.patch
+
+//Returns a string representation of the SemanticVersion in the format "vMajor.Minor.PatchState" (e.g., "v1.2.3-rc.1").
+_to_string() -> String
+```
+
+## UUID 🔑
+
+The `UUID` class in Godot provides a convenient way to generate and manage Universally Unique Identifiers _(UUIDs)_. These identifiers are strings of characters that are highly likely to be unique, making them useful for various purposes in your game development.
+
+- **Unique Identification:** Generates random UUIDs that are statistically improbable to clash with existing ones.
+- **Multiple Generation Options:** Offers two methods for creating UUIDs
+
+**Benefits for Users:**
+
+- _Simplified Unique IDs:_ Assigning unique IDs to objects, resources, or network connections becomes easier.
+- _Reduced Errors:_ Less chance of conflicts arising from duplicate IDs.
+- _Flexibility:_ Choose between the standard generation method or provide a custom random number generator for specific needs.
+- _Easy Integration:_ Convert the UUID to a string for display or transmit it as a byte array for internal processing.
+
+```csharp
+// Generates a version 4 UUID according to the standard format.
+v4() -> String
+
+// Allows you to provide a custom random number generator for more control over the generation process.
+v4_rng(rng: RandomNumberGenerator) -> String
+
+// Easily convert the generated UUID to a human-readable string format
+as_string()
+
+//  Access the raw byte data of the UUID as an array
+as_array()
+
+//  Check if two UUIDs are identical
+is_equal(other)
+```
+
+To generate a new `UUID` just use `UUID.v4()` or if you want to provide a custom `RandomNumberGenerator` use `UUID.v4_rng(RandomNumberGenerator.new())`
