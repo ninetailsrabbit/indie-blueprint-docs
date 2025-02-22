@@ -32,8 +32,10 @@
     - [Screenshots](#screenshots)
     - [Parallax](#parallax)
 - [Utilities](#utilities)
+  - [Collisions](#collisions)
+  - [Color](#color)
   - [File handling](#file-handling)
-    - [How to use load_csv](#how-to-use-load_csv)
+    - [Load CSV](#load-csv)
   - [Geometry](#geometry)
   - [Hardware detector](#hardware-detector)
     - [Device/OS detection](#deviceos-detection)
@@ -302,39 +304,55 @@ adapt_parallax_to_vertical_viewport(parallax: Parallax2D, viewport: Rect2 = get_
 
 General utilities that does not belongs to a particular place and are sed as static classes that can be accessed at any time even if they are not in the scene tree.
 
+## Collisions
+
+The `CollisionHelper` class provide methods for working with collisions, here you can translate `layer->value` and `value->layer` in a fast way.
+
+```swift
+layer_to_value(layer: int) -> int
+
+value_to_layer(value: int) -> int
+
+// Examples
+
+CollisionHelper.layer_to_value(3) // Returns 8
+CollisionHelper.value_to_layer(8) // Returns 3
+
+CollisionHelper.layer_to_value(11) // Returns 1024
+CollisionHelper.value_to_layer(1024) // Returns 11
+
+```
+
+## Color
+
 ## File handling
 
 The `FileHelper` class provides static methods to work with file extensions mainly parsing or retrieving metadata.
 
----
+```swift
+// Validate a file path to see if it is valid and can be worked with.
+filepath_is_valid(path: String) -> bool
 
-`filepath_is_valid(path: String) -> bool`
+// Validate a directory path to see if it is valid and can be worked with.
+dirpath_is_valid(path: String) -> bool
 
-Validate a file path to know if the file is in good condition and is accessible to operate with it.
+// Validate a directory path where the godot executable folder is.
+directory_exist_on_executable_path(directory_path: String) -> bool
 
-`dirpath_is_valid(path: String) -> bool`
+// Get all the files recursively on the path provided, a RegEx can be passed to filter the files to retrieve.
+get_files_recursive(path: String, regex: RegEx = null) -> Array
 
-Validate a directory path to know if the file is in good condition and is accessible to operate with it.
+// Copy content of a folder recursively into another overwrite existing files on the process
+copy_directory_recursive(from_dir: String, to_dir: String) -> Error
 
-`directory_exist_on_executable_path(directory_path: String) -> bool`
+// Remove all the files recursively on the path provided, a RegEx can be passed to filter what files to delete.
+remove_files_recursive(path: String, regex: RegEx = null) -> Error
 
-Validate a directory path where the godot executable folder is.
+// This is actually a shortcut to retrieve all the .pck files on a folder but uses get_files_recursive with a RegEx behind the scenes.
+get_pck_files(path: String) -> Array
+```
 
-`get_files_recursive(path: String, regex: RegEx = null) -> Array`
-
-Get all the files recursively on the path provided, a `RegEx` can be passed to filter the files to retrieve.
-
-`copy_directory_recursive(from_dir :String, to_dir :String) -> Error`
-
-Copy content of a folder recursively into another overwrite existing files on the process.
-
-`remove_files_recursive(path: String, regex: RegEx = null) -> Error`
-
-Remove all the files recursively on the path provided, a `RegEx` can be passed to filter what files to delete.
-
-`static func get_pck_files(path: String) -> Array`
-
-This is actually a shortcut to retrieve all the `.pck` files on a folder but uses `get_files_recursive` with a `RegEx` behind the scenes.
+### Load CSV
 
 `load_csv(path: String, as_dictionary: bool = true): Variant`
 
@@ -347,8 +365,6 @@ This function loads a CSV/TSV file from the specified path and returns the parse
 
 - **Variant:** The parsed CSV data can be either an array of dictionaries _(if as_dictionary is true)_ or an array of arrays.
 - **ERR_PARSE_ERROR (int):** This error code is returned if there are issues opening the file, parsing the CSV data, or encountering data inconsistencies.
-
-### How to use load_csv
 
 For this example was used the `currency.csv` that you can find in [this website](https://wsform.com/knowledgebase/sample-csv-files/)
 
@@ -396,31 +412,47 @@ for line in FileHelper.load_csv("res://currency.csv"):
 
 Functions to obtain information on sizes, measurements or to draw specific shapes
 
----
+```swift
+// Get a random position as `Vector3` on any mesh shape surface
+get_random_mesh_surface_position(target: MeshInstance3D) -> Vector3
 
-`get_random_mesh_surface_position(target: MeshInstance3D) -> Vector3`
+// Get a random position as `Vector2` from the inside of a circle with the given `radius`
+random_inside_unit_circle(position: Vector2, radius: float = 1.0) -> Vector
 
-Get a random position as `Vector3` on any mesh shape surface
+// Get a random position as `Vector2` from a circunference
+random_on_unit_circle(position: Vector2) -> Vector2
 
-`random_inside_unit_circle(position: Vector2, radius: float = 1.0) -> Vector2`
+// Get a random point as Vector2 in the provided Rect2
+random_point_in_rect(rect: Rect2) -> Vector2
 
-Get a random position as `Vector2` from the inside of a circle with the given `radius`
+// Get a random point as Vector2 in annulus _(a donut shape)_ with provided center and radius provided
+random_point_in_annulus(center, radius_small, radius_large) -> Vector2
 
-`random_on_unit_circle(position: Vector2) -> Vector2`
+// Get the bounding box as `Rect2` from the polygon points provided
+polygon_bounding_box(polygon: PackedVector2Array) -> Rect2
 
-Get a random position as `Vector2` from a circunference
 
-`random_point_in_rect(rect: Rect2) -> Vector2`
+is_valid_polygon(points: PackedVector2Array) -> bool
 
-Get a random point as `Vector2` in the provided `Rect2`
+calculate_polygon_area(polygon: PackedVector2Array) -> float
 
-`random_point_in_annulus(center, radius_small, radius_large) -> Vector2`
+fracture_polygons_triangles(polygon: PackedVector2Array) -> Array
 
-Get a random point as `Vector2` in annulus _(a donut shape)_ with provided `center` and `radius provided`
 
-`polygon_bounding_box(polygon: PackedVector2Array) -> Rect2`
+// Shorcuts to create MeshInstance3D with a specific mesh shape
+create_plane_mesh(size: Vector2 = Vector2.ONE) -> MeshInstance3D
 
-Get the bounding box as `Rect2` from the polygon points provided
+create_quad_mesh(size: Vector2 = Vector2.ONE) -> MeshInstance3D
+
+create_prism_mesh(size: Vector3 = Vector3.ONE, left_to_right: float = 0.5) -> MeshInstance3D
+
+create_cilinder_mesh(height: float = 2.0, top_radius: float = 0.5, bottom_radius: float = 0.5) -> MeshInstance3D
+
+create_sphere_mesh(height: float = 2.0, radius: float = 0.5, is_hemisphere: bool = false) -> MeshInstance3D
+
+create_capsule_mesh(height: float = 2.0, radius: float = 0.5) -> MeshInstance3D
+
+```
 
 ## Hardware detector
 
