@@ -67,6 +67,10 @@
   - [String](#string)
     - [Constants](#constants-1)
     - [Methods](#methods-1)
+  - [Time](#time)
+  - [Camera2D](#camera2d)
+  - [Camera3D](#camera3d)
+  - [Texture](#texture)
 
 # Create a new repository from template
 
@@ -1718,4 +1722,101 @@ repeat(text: String, times: int) -> String
 bars(amount: int, separator: String = "") -> String
 bars(3) // "███"
 bars(3, " ") // "█ █ █"
+```
+
+## Time
+
+The `TimeHelper` class provides useful methods to manipulate the time in-game.
+
+```csharp
+class TimeHelper
+
+enum TimeUnit {
+	Seconds,
+	Milliseconds,
+	Microseconds
+}
+
+
+static var conversions_to_seconds: Dictionary = {
+	TimeUnit.Seconds: 1.0,
+	TimeUnit.Milliseconds: 1_000.0,
+	TimeUnit.Microseconds: 1_000_000.0,
+}
+
+
+"""
+Formats a time value into a string representation of minutes, seconds, and optionally milliseconds.
+
+Args:
+	time (float): The time value to format, in seconds.
+	use_milliseconds (bool, optional): Whether to include milliseconds in the formatted string. Defaults to false.
+
+Returns:
+	str: A string representation of the formatted time in the format "MM:SS" or "MM:SS:mm", depending on the value of use_milliseconds.
+
+Example:
+	# Format 123.456 seconds without milliseconds
+	var formatted_time = format_seconds(123.456)
+	# Result: "02:03"
+
+	# Format 123.456 seconds with milliseconds
+	var formatted_time_with_ms = format_seconds(123.456, true)
+	# Result: "02:03:45"
+"""
+format_seconds(time: float, use_milliseconds: bool = false) -> String
+
+// Returns the amount of time passed since the engine started
+get_ticks(time_unit: TimeUnit = TimeUnit.Seconds) -> float
+
+// Returns the conversion of [method Time.get_ticks_usec] to seconds.
+get_ticks_seconds() -> float
+
+convert_to_seconds(time: float, origin_unit: TimeUnit) -> float
+
+convert_to(time: float, origin_unit: TimeUnit, target_unit: TimeUnit) -> float
+
+// Shorcuts to quickly create timers by code
+create_idle_timer(wait_time: float = 1.0, autostart: bool = false, one_shot: bool = false) -> Timer
+
+create_physics_timer(wait_time: float = 1.0, autostart: bool = false, one_shot: bool = false) -> Timer
+
+```
+
+## Camera2D
+
+The `Camera2DHelper` provides useful methods to manipulate and obtain information from 2D cameras
+
+```swift
+//This function aims to calculate a new camera position based on mouse movement, effectively simulating a panning camera effect.
+get_panning_camera_position(camera: Camera2D) -> Vector2
+```
+
+## Camera3D
+
+The `Camera3DHelper` provides useful methods to manipulate and obtain information from 3D cameras
+
+```swift
+center_by_ray_origin(camera: Camera3D) -> Vector3
+
+center_by_origin(camera: Camera3D) -> Vector3
+
+forward_direction(camera: Camera3D) -> Vector3
+
+is_facing_camera(camera: Camera3D, node: Node) -> bool
+```
+
+## Texture
+
+The `TextureHelper` provides useful methods to manipulate and obtain information from textures and sprites.
+
+```swift
+get_texture_dimensions(texture: Texture2D) -> Rect2i
+
+get_texture_rect_dimensions(texture_rect: TextureRect) -> Vector2
+
+get_sprite_dimensions(sprite: Sprite2D) -> Vector2
+
+get_png_rect_from_texture(texture: Texture2D) -> Rect2i
+
 ```
