@@ -34,6 +34,8 @@
 - [Utilities](#utilities)
   - [Collisions](#collisions)
   - [Color](#color)
+    - [ColorGradient](#colorgradient)
+    - [ColorPalette](#colorpalette)
   - [File handling](#file-handling)
     - [Load CSV](#load-csv)
   - [Geometry](#geometry)
@@ -325,6 +327,96 @@ CollisionHelper.value_to_layer(1024) // Returns 11
 
 ## Color
 
+The `ColorHelper` class provides an easy way to work with colors. Create gradients and palettes through resources, generate random colors, compare them, etc.
+
+```swift
+const ColorPalettesPath: String = "res://utilities/color/palettes/"
+const GradientsPath: String = "res://utilities/color/gradients/"
+
+// By default it uses the path provided in this class to find recursively the palette & gradient with the selected id
+get_palette(id: StringName) -> ColorPalette
+get_gradient(id: StringName) -> ColorGradient
+
+// ---------------------
+
+// Generate colors
+enum ColorGenerationMethod {
+	RandomRGB,
+	GoldenRatioHSV
+}
+
+// Based on the method, it will call the generate_random_hsv_colors or generate_random_rgb_colors method
+generate_random_colors(method: ColorGenerationMethod, number_of_colors: int = 12, saturation: float = 0.5, value: float = 0.95) -> PackedColorArray
+
+// Using ideas from https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
+static func generate_random_hsv_colors(number_of_colors: int = 12, saturation: float = 0.5, value: float = 0.95) -> PackedColorArray
+
+// Using ideas from https://www.iquilezles.org/www/articles/palettes/palettes.htm
+static func generate_random_rgb_colors(number_of_colors: int = 12, darkened_value: float = 0.2) -> PackedColorArray
+
+// ---------------------
+
+// Compare colors with a tolerance
+static func colors_are_similar(color_a: Color, color_b: Color, tolerance: float = 100.0) -> bool
+
+// Translates a Vector3 or Vector4 to a valid Color. Returns Color.WHITE by default
+static func color_from_vector(vec) -> Color:
+
+
+```
+
+### ColorGradient
+
+```swift
+class_name ColorGradient extends Resource
+
+@export var id: StringName
+@export var name: StringName
+@export var gradient: GradientTexture1D
+```
+
+This template provides you a set of gradients located in `res://utilities/color/gradients` to use out of the box:
+
+![ammo8](images/gradients/ammo8.png)
+
+![borkfest](images/gradients/borkfest.png)
+
+![coffee](images/gradients/coffee.png)
+
+![coffee](images/gradients/dreamscapes.png)
+
+![funkyfutures](images/gradients/funkyfutures.png)
+
+![goosebumps_gold](images/gradients/goosebumps_gold.png)
+
+![nyx8](images/gradients/nyx8.png)
+
+![oil6](images/gradients/oil6.png)
+
+![pollen8](images/gradients/pollen8.png)
+
+![rust_gold](images/gradients/rust_gold.png)
+
+![slso8](images/gradients/slso8.png)
+
+![submerged_chimera](images/gradients/submerged_chimera.png)
+
+![winter_wonderland](images/gradients/winter_wonderland.png)
+
+### ColorPalette
+
+```swift
+class_name ColorPalette extends Resource
+
+@export var id: StringName
+@export var name: StringName
+@export var colors: PackedColorArray = []
+```
+
+This template provides you a set of palettes located in `res://utilities/color/palettes` to use out of the box:
+
+**_The colors templates provided are the same as the gradients but it uses a `PackedColorArray` instead of `GradientTexture1D`._**
+
 ## File handling
 
 The `FileHelper` class provides static methods to work with file extensions mainly parsing or retrieving metadata.
@@ -557,130 +649,122 @@ class GraphicQualityDisplay:
 
 This section introduces the `InputHelper`, a collection of helpful functions for handling common input-related tasks in your game. It acts as a shortcut to avoid repetitive code for frequently used input checks.
 
-`is_mouse_visible() -> bool`
+```swift
+// Detects one single left click
+is_mouse_left_click(event: InputEvent) -> bool
+// Detects a constantly pressed left mouse button
+is_mouse_left_button_pressed(event: InputEvent) -> bool
 
-Return if the current mouse input mode is visible
+// Detects one single right click
+is_mouse_right_click(event: InputEvent) -> bool
 
-`is_mouse_captured() -> bool`
+// Detects a constantly pressed right mouse button
+is_mouse_right_button_pressed(event: InputEvent) -> bool
 
-Return if the current mouse input mode is captured
+// Quickly checks if the event is a mouse button
+is_mouse_button(event: InputEvent) -> bool
 
-`show_mouse_cursor() -> void`
+// In certain cases you want to translate the double clicks to single to ignore them. In this template is used
+// to remove the double clicks when input remapping
+double_click_to_single(event: InputEvent) -> InputEvent
 
-Change the current mouse mode to show the cursor
+// Get the relative motion regardless of viewport resolution and scale. This is useful when getting mouse motion to move
+// the camera in a First Person Controller for example
+mouse_relative_motion(event: InputEvent, scene_tree: SceneTree) -> Vector2
 
-`show_mouse_cursor_confined() -> void`
+// Return if the current mouse input mode is visible
+is_mouse_visible() -> bool
 
-Change the current mouse mode to confined
+// Return if the current mouse input mode is captured
+is_mouse_captured() -> bool
 
-`capture_mouse() -> void`
+// Change the current mouse mode to show the cursor
+show_mouse_cursor() -> void
 
-Change the current mouse mode to captured
+// Change the current mouse mode to confined
+show_mouse_cursor_confined() -> void
 
-`hide_mouse_cursor() -> void`
+// Change the current mouse mode to captured
+capture_mouse() -> void
 
-Change the current mouse mode to hide
+// Change the current mouse mode to hide
+hide_mouse_cursor() -> void
 
-`hide_mouse_cursor_confined() -> void`
+// Change the current mouse mode to hide confined
+hide_mouse_cursor_confined() -> void
 
-Change the current mouse mode to hide confined
+// Translates a raw InputEventKey into a human-readable string representation. This is useful for displaying what key was // pressed, including modifiers like "ctrl" or "shift" and physical key names.
+readable_key(key: InputEventKey)
 
-` is_mouse_button(event: InputEvent) -> bool`
-
-Quickly checks if the event is a mouse button
-
-`is_mouse_left_click(event: InputEvent) -> bool`
-
-Quickly checks if the left mouse button was clicked in the given InputEvent.
-
-`is_mouse_right_click(event: InputEvent) -> bool`
-
-Similar to **is_mouse_left_click**, but checks for the right mouse button click.
-
-`is_mouse_left_button_pressed(event: InputEvent) -> bool`
-
-Quickly check if the left mouse button is keep pressed
-
-`is_mouse_right_button_pressed(event: InputEvent) -> bool`
-
-Quickly check if the right mouse button is keep pressed
-
-`numeric_key_pressed(event: InputEvent) -> bool`
-
-Determines if a numeric key _(including numpad keys)_ was pressed in the `InputEvent`.
-
-`readable_key(key: InputEventKey)`
-
-Translates a raw InputEventKey into a human-readable string representation. This is useful for displaying what key was pressed, including modifiers like "ctrl" or "shift" and physical key names.
-
-```bash
-## Basic example
+// Basic example
 func _input(event: InputEvent):
 	if event is InputEventKey:
 	   InputHelper.readable_key(event)
-		# Display the pressed key combination (e.g., "ctrl + alt + shift")
-   	   print("Pressed key:", readable_key_text)
+   	   print("Pressed key:", readable_key_text)// Display the pressed key combination (e.g., "ctrl + alt + shift")
+
+
+// Determines if a numeric key (including numpad keys) was pressed in the InputEvent.
+numeric_key_pressed(event: InputEvent) -> bool
+
+any_key_modifier_is_pressed() -> bool
+
+shift_modifier_pressed() -> bool
+
+ctrl_modifier_pressed() -> bool
+
+alt_modifier_pressed() -> bool
+
+// Quickly checks if the event is a controller button (joypad button)
+is_controller_button(event: InputEvent) -> bool
+
+// Quickly checks if the event is a controller motion (joypad motion)
+is_controller_axis(event: InputEvent) -> bool
+
+// Check if the current input comes from gamepad. It's a combination of is_controller_button and is_controller_axis
+is_gamepad_input(event: InputEvent) -> bool
+
+// This function checks if the action exists in the InputMap and is just pressed. The static class Input is used directly so this function only needs the input action name
+action_just_pressed_and_exists(action: String) -> bool
+
+// This function checks if the action exists in the InputMap and is pressed. This one can receive an InputEvent as it's being used the event.is_action_pressed
+action_pressed_and_exists(action: String, event: InputEvent = null) -> bool
+
+// Check if the action has been released and exists
+action_just_released_and_exists(action: String) -> bool
+
+// Check if the action has released and exists. This one needs to receive an InputEvent
+action_released_and_exists(event: InputEvent, action: String) -> bool
+
+// This powerful function checks if any of the actions listed in the provided actions array were just pressed in the InputEvent. This can simplify handling multiple key or button presses simultaneously.
+is_any_action_just_pressed(actions: Array, event: InputEvent = null):
+
+// Similar to is_any_action_just_pressed, but checks if any of the actions in the array are currently being held down (pressed).
+is_any_action_pressed(actions: Array, event:InputEvent = null):
+
+// This function checks if any of the actions in the actions array were just released in the InputEvent. This can be useful for detecting when a player lets go of a key or button.
+is_any_action_just_released(actions: Array, event: InputEvent = null)
+
+// This function checks if any of the actions in the actions array were released in the InputEvent. This can be useful for detecting when a player lets go of a key or button.
+is_any_action_released(actions: Array, event: InputEvent)
+
+// Releases held input actions. This is useful for situations where you want to interrupt a continuously held input, such as canceling a cinematic trigger, ending a time stop effect, or breaking a player stun.
+release_input_actions(actions: Array[StringName] = [])
+
+// Get all input events defined in the InputMap for the given action name, returns an empty array if the action does not exist.
+get_all_inputs_for_action(action: String) -> Array[InputEvent]
+
+// Get all keyboard input events defined in the InputMap for the given action name, returns an empty array if the action does not exist.
+get_keyboard_inputs_for_action(action: String) -> Array[InputEvent]
+
+// Get the first keyboard input for the given action that exists in the InputMap
+get_keyboard_input_for_action(action: String) -> InputEvent
+
+// Get all joypad input events defined in the InputMap for the given action name, returns an empty array if the action does not exist.
+get_joypad_inputs_for_action(action: String) -> Array[InputEvent]
+
+// Get the first joypad input for the given action that exists in the InputMap
+get_joypad_input_for_action(action: String) -> InputEvent
 ```
-
-`is_controller_button(event: InputEvent) -> bool`
-
-Quickly checks if the event is a controller button _(joypad button)_
-
-`is_controller_axis(event: InputEvent) -> bool`
-
-Quickly checks if the event is a controller motion _(joypad motion)_
-
-`is_gamepad_input(event: InputEvent) -> bool`
-
-Check if the current input comes from gamepad. It's a combination of **is_controller_button** and **is_controller_axis**
-
-`release_input_actions(actions: Array[StringName] = [])`
-
-Releases held input actions. This is useful for situations where you want to interrupt a continuously held input, such as canceling a cinematic trigger, ending a time stop effect, or breaking a player stun.
-
-`is_any_action_just_pressed(actions: Array, event: InputEvent = null):`
-
-This powerful function checks if any of the actions listed in the provided actions array were just pressed in the InputEvent. This can simplify handling multiple key or button presses simultaneously.
-
-`action_just_pressed_and_exists(action: String) -> bool:`
-
-This function checks if the action exists in the `InputMap` and is just pressed. The static class `Input` is used directly so this function only needs the input action name.
-
-`action_pressed_and_exists(action: String, event: InputEvent = null) -> bool:`
-
-This function checks if the action exists in the `InputMap` and is pressed. This one can receiev an `InputEvent` as it's being used the `event.is_action_pressed`
-
-`is_any_action_pressed(actions: Array, event:InputEvent = null):`
-
-Similar to `is_any_action_just_pressed`, but checks if any of the actions in the array are currently being held down (pressed).
-
-`is_any_action_just_released actions: Array, event: InputEvent = null):`
-
-This function checks if any of the actions in the actions array were just released in the InputEvent. This can be useful for detecting when a player lets go of a key or button.
-
-`is_any_action_released(actions: Array, event: InputEvent)`
-
-This function checks if any of the actions in the actions array were released in the InputEvent. This can be useful for detecting when a player lets go of a key or button.
-
-`get_all_inputs_for_action(action: String) -> Array[InputEvent]`
-
-Get all input events defined in the `InputMap` for the given action name, returns an empty array if the action does not exist.
-
-`get_keyboard_inputs_for_action(action: String) -> Array[InputEvent]`
-
-Get all keyboard input events defined in the `InputMap` for the given action name, returns an empty array if the action does not exist.
-
-`get_keyboard_input_for_action(action: String) -> InputEvent`
-
-Get the first keyboard input for the given action that exists in the `InputMap`
-
-`get_joypad_inputs_for_action(action: String) -> Array[InputEvent]`
-
-Get all joypad input events defined in the `InputMap` for the given action name, returns an empty array if the action does not exist.
-
-`get_joypad_input_for_action(action: String) -> InputEvent`
-
-Get the first joypad input for the given action that exists in the `InputMap`
 
 ### MotionInput
 
