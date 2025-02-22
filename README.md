@@ -45,6 +45,7 @@
     - [Auto-Discover quality preset](#auto-discover-quality-preset)
   - [Input](#input)
     - [InputHelper](#inputhelper)
+    - [InputControls](#inputcontrols)
     - [MotionInput](#motioninput)
       - [Example of use](#example-of-use)
 
@@ -649,7 +650,7 @@ class GraphicQualityDisplay:
 
 This section introduces the `InputHelper`, a collection of helpful functions for handling common input-related tasks in your game. It acts as a shortcut to avoid repetitive code for frequently used input checks.
 
-```swift
+```csharp
 // Detects one single left click
 is_mouse_left_click(event: InputEvent) -> bool
 // Detects a constantly pressed left mouse button
@@ -766,6 +767,27 @@ get_joypad_inputs_for_action(action: String) -> Array[InputEvent]
 get_joypad_input_for_action(action: String) -> InputEvent
 ```
 
+### InputControls
+
+The `InputControls` class holds all the actions that may or may not exist in the InputMap of your project. It's a global accessor
+
+```csharp
+class_name InputControls
+
+const MoveRight: StringName = &"move_right"
+const MoveLeft: StringName = &"move_left"
+const MoveForward: StringName = &"move_forward"
+const MoveBack: StringName = &"move_back"
+
+const CrouchAction: StringName = &"crouch"
+const CrawlAction: StringName = &"crawl"
+const RunAction: StringName = &"run"
+const JumpAction: StringName = &"jump"
+const DashAction: StringName = &"dash"
+
+//...
+```
+
 ### MotionInput
 
 This class simplifies handling and transforming player input directions in your Godot games. It provides various properties and functions to access and manipulate input based on your needs.
@@ -780,42 +802,46 @@ This class simplifies handling and transforming player input directions in your 
   - **Deadzone-applied Horizontal/Vertical Axes:** Provides separate horizontal and vertical axes with the deadzone applied.
   - **World Coordinate Space Direction (3D Only):** In 3D scenes, calculates the input direction in the actor's world coordinate space for movement calculations.
 
-A new `MotionInputn` can receive this parameters on the constructor:
+A new `MotionInput` can receive this parameters on the constructor:
 
 - `actor (Node)`: A reference to the actor _(either Node2D or Node3D)_ from which the input is retrieved.
 - `deadzone (float)`: Controls the deadzone size _(range: 0.0 to 1.0)_. Higher values create a larger deadzone.
 
 The only function you need to use from this class is `update()` that **save the current direction into previous variables** and **update the directions** from the current inputs.
 
-By default it uses this inputs action names that comes preconfigured on this template, if you want to use other names just change the variables or use the set methods `change_move_[DIRECTION]_action(new_action: String)` in the class:
+By default it uses this inputs action names that comes preconfigured on this template, if you want to use other names just change the variables or use the set methods `change_move_[DIRECTION]_action(new_action: StringName)` in the class:
 
 ```csharp
 class_name MotionInput
 
-var move_right_action: String = "move_right"
-var move_left_action: String = "move_left"
-var move_forward_action: String = "move_forward"
-var move_back_action: String = "move_back"
+var move_right_action: StringName = InputControls.MoveRight
+var move_left_action: StringName = InputControls.MoveLeft
+var move_forward_action: StringName = InputControls.MoveForward
+var move_back_action: StringName = InputControls.MoveBack
 
 var actor: Node
 var deadzone: float = 0.5:
 	set(value):
 		deadzone = clamp(value, 0.0, 1.0)
 
+// Current input
 var input_direction: Vector2
 var input_direction_deadzone_square_shape: Vector2
 var input_direction_horizontal_axis: float
 var input_direction_vertical_axis: float
+var input_axis_as_vector: Vector2
 var input_direction_horizontal_axis_applied_deadzone: float
 var input_direction_vertical_axis_applied_deadzone: float
 var input_joy_direction_left: Vector2
 var input_joy_direction_right: Vector2
 var world_coordinate_space_direction: Vector3
 
+// Previous frame input
 var previous_input_direction: Vector2
 var previous_input_direction_deadzone_square_shape: Vector2
 var previous_input_direction_horizontal_axis: float
 var previous_input_direction_vertical_axis: float
+var previous_input_axis_as_vector: Vector2
 var previous_input_direction_horizontal_axis_applied_deadzone: float
 var previous_input_direction_vertical_axis_applied_deadzone: float
 var previous_input_joy_direction_left: Vector2
@@ -823,7 +849,6 @@ var previous_input_joy_direction_right: Vector2
 var previous_world_coordinate_space_direction: Vector3
 
 //...
-
 ```
 
 #### Example of use
