@@ -63,6 +63,10 @@
     - [Vector](#vector)
     - [Semantic version (Semver)](#semantic-version-semver)
   - [UUID 🔑](#uuid-)
+  - [Label](#label)
+  - [String](#string)
+    - [Constants](#constants-1)
+    - [Methods](#methods-1)
 
 # Create a new repository from template
 
@@ -1429,12 +1433,140 @@ static var opposite_directions_v3: Dictionary = {
 	Vector3.BACK: Vector3.FORWARD
 }
 
+// Converts Vectors like Vector3(1, 0, 0) into Vector3(0, 1, 1)
+invert_vector(vector: Vector3) -> Vector3
+
 
 //This method calculates the opposite of a given upward direction vector in 2D space. For example, if your CharacterBody2D uses Vector2.UP as its up_direction, the opposite would be Vector2.DOWN.
 // --------------
 // This function is useful for applying gravity in the opposite direction of the player, allowing you to create inverted gravity or flipped worlds. Even when your player changes their up direction to Vector2.DOWN, this method will correctly return Vector2.UP so you can set gravity pulls player in that direction.
 up_direction_opposite_vector2(up_direction: Vector2) -> Vector2
+
 up_direction_opposite_vector3(up_direction: Vector3) -> Vector3
+
+
+generate_2d_random_directions_using_degrees(num_directions: int = 10, origin: Vector2 = Vector2.UP, min_angle: float = 0.0, max_angle: float = 360.0) -> Array[Vector2]
+
+generate_2d_random_directions_using_radians(num_directions: int = 10, origin: Vector2 = Vector2.UP, min_angle: float = 0.0, max_angle: float = 6.2831853072) -> Array[Vector2]
+
+generate_3d_random_directions_using_degrees(num_directions: int = 10, origin: Vector3 = Vector3.UP, min_angle: float = 0.0, max_angle: float = 360.0) -> Array[Vector3]
+
+generate_3d_random_directions_using_radians(num_directions: int = 10, origin: Vector3 = Vector3.UP, min_angle: float = 0.0, max_angle: float = 6.2831853072) -> Array[Vector3]
+
+
+generate_random_angle_in_radians(min_angle: float = 0.0, max_angle: float = 6.2831853072) -> float
+
+generate_random_angle_in_degrees(min_angle: float = 0.0, max_angle: float = 360.0) -> float
+
+generate_2d_random_fixed_direction() -> Vector2
+
+generate_3d_random_fixed_direction() -> Vector3
+
+generate_2d_random_direction() -> Vector2
+
+generate_3d_random_direction() -> Vector3
+
+// Translate -1.0, 0 and 1.0 values from getting the input axis into a Vector2
+translate_x_axis_to_vector(axis: float) -> Vector2
+
+translate_y_axis_to_vector(axis: float) -> Vector2
+
+// Normalize the vector taking into account if it's diagonal
+normalize_vector2(value: Vector2) -> Vector2
+
+normalize_diagonal_vector2(direction: Vector2) -> Vector2
+
+normalize_vector3(value: Vector3) -> Vector3
+
+normalize_diagonal_vector3(direction: Vector3) -> Vector3
+
+is_diagonal_direction_v2(direction: Vector2) -> bool
+
+is_diagonal_direction_v3(direction: Vector3) -> bool
+
+// -------------
+// Explanation: These functions perform a distance check between two vectors but use a squared distance comparison instead of calculating the actual distance. They determine if the squared distance between the vector and second_vector is less than or equal to the square of the provided distance.
+
+// Reason for Squared Distance: Calculating the squared distance is computationally cheaper than calculating the actual distance using a square root operation. This can be beneficial for performance optimization when checking distances frequently.
+
+// Use Case: Imagine having a large number of enemies in a game and needing to check if they are within a certain attack range of the player. Using is_withing_distance_squared can be more efficient than calculating the actual distance for each enemy, especially if the result (being within range) is only used for a binary decision (attack or not).
+
+// ----- Important Note -----
+// While using squared distances offers a performance benefit, keep in mind that it doesn't give you the actual distance between the points. If you need the actual distance for calculations or other purposes, you'll need to perform a square root operation on the result of is_withing_distance_squared
+is_withing_distance_squared_v2(vector: Vector2, second_vector: Vector2, distance: float) -> bool
+
+is_withing_distance_squared_v3(vector: Vector3, second_vector: Vector3, distance: float) -> bool
+
+
+// Transforms a rotation angle in radians into a Vector in space
+direction_from_rotation_v2(rotation: float) -> Vector2
+
+direction_from_rotation_v3(rotation: float) -> Vector3
+
+direction_from_rotation_degrees_v2(rotation_degrees: float) -> Vector2
+
+direction_from_rotation_degrees_v3(rotation_degrees: float) -> Vector3
+
+// Use Case: Imagine creating a dynamic light source that simulates a flickering torch or a spotlight with a slight wobble. You can leverage the rotate_horizontal_random and rotate_vertical_random functions to achieve this effect.
+
+// Rotate the vector in a random horizontal direction [Vector2.RIGHT, Vector2.LEFT]
+rotate_horizontal_random(origin: Vector3 = Vector3.ONE) -> Vector3
+
+// Rotate the vector in a random vertical direction  [Vector2.UP, Vector2.DOWN]
+rotate_vertical_random(origin: Vector3 = Vector3.ONE) -> Vector3
+
+
+vec3_from_color_rgb(color: Color) -> Vector3
+
+vec3_from_color_hsv(color: Color) -> Vector3
+
+
+get_position_by_polar_coordinates_v2(center_position: Vector2, angle_radians: float, radius: float) -> Vector2
+
+get_position_by_polar_coordinates_v3(center_position: Vector3, angle_radians: float, radius: float) -> Vector3
+
+
+// -------------
+//Also known as the "city distance" or "L1 distance". It measures the distance between two points as the sum of the absolute differences of their coordinates in each dimension.
+
+// Explanation: These functions calculate the Manhattan distance (also known as L1 distance or city block distance) between two points. It represents the total distance traveled by moving horizontally and vertically along a grid, ignoring any diagonal movement.
+
+// Use Case: Imagine a pathfinding algorithm on a grid-based map. Manhattan distance can be used to estimate the distance between two points on the grid, as **movement is restricted to horizontal and vertical steps.
+distance_manhattan_v2(a: Vector2, b: Vector2) -> float
+distance_manhattan_v3(a: Vector3, b: Vector3) -> float
+length_manhattan_v2(a : Vector2) -> float
+length_manhattan_v3(a : Vector3) -> float
+
+// -------------
+// Also known as the "chess distance" or "L∞ distance". It measures the distance between two points as the greater of the absolute differences of their coordinates in each dimension.
+
+// Explanation: These functions calculate the Chebyshev distance *(also known as L∞ distance or chessboard distance)* between two points. It represents the maximum absolute difference of the coordinates between the points, similar to a king's movement in chess (only horizontal, vertical, or diagonal steps of one square).
+
+// Use Case: Imagine a tower defense game where enemies can only move horizontally or vertically along pre-defined paths. Chebyshev distance can be used to determine the enemy's "attack range" based on the maximum distance they can travel in a single move.
+distance_chebyshev_v2(a: Vector2, b: Vector2) -> float
+distance_chebyshev_v3(a: Vector3, b: Vector3) -> float
+length_chebyshev_v2(a : Vector2) -> float
+length_chebyshev_v3(a : Vector3) -> float
+
+// -------------
+// Explanation: These functions calculate the closest point on a line segment (defined by points a and b) to a third point c. Additionally, they clamp the result to ensure the closest point lies within the line segment (between a and b).
+
+// Use Case: Imagine a character trying to navigate around an obstacle. This function can be used to find the closest point on the obstacle's edge (line segment) that the character can reach from their current position (c).
+closest_point_on_line_clamped_v2(a: Vector2, b: Vector2, c: Vector2) -> Vector2
+closest_point_on_line_clamped_v3(a: Vector3, b: Vector3, c: Vector3) -> Vector3
+
+
+// -------------
+// This function is similar to the previous one but does not clamp the result. It calculates the closest point on the line segment defined by a and b to a third point c. It uses the same vector operations as the previous closest_point_on_line_clamped_v2 function.
+
+// Explanation: These functions are similar to the clamped versions, but they calculate the closest point on the line segment without clamping. The non-normalized versions return the actual vector representing the closest point, while the normalized versions might return a parameter along the line segment that represents the closest point.
+
+// Use Case: Imagine a projectile being fired towards a moving target. These functions can be used to determine the point on the target's projected path (line segment) that the projectile is most likely to collide with, even if the collision happens outside the actual line segment itself.
+closest_point_on_line_v2(a: Vector2, b: Vector2, c: Vector2) -> Vector2
+closest_point_on_line_v3(a: Vector3, b: Vector3, c: Vector3) -> Vector3
+closest_point_on_line_normalized_v2(a: Vector2, b: Vector2, c: Vector2) -> float
+closest_point_on_line_normalized_v3(a: Vector3, b: Vector3, c: Vector3) -> float
+
 
 
 ```
@@ -1511,3 +1643,79 @@ is_equal(other)
 ```
 
 To generate a new `UUID` just use `UUID.v4()` or if you want to provide a custom `RandomNumberGenerator` use `UUID.v4_rng(RandomNumberGenerator.new())`
+
+## Label
+
+The `LabelHelper` class provide methods to manipulate text using the `Label` node
+
+```csharp
+// Adjust the text inside a label using the max_size in pixels as reference
+func adjust_text(label: Label, max_size: int = 200) -> void
+```
+
+## String
+
+The `StringHelper` class provides helpful functions for manipulating strings and text in general.
+
+### Constants
+
+```csharp
+const AsciiAlphanumeric: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+const AsciiLetters: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const AsciiLowercase: String = "abcdefghijklmnopqrstuvwxyz"
+const AsciiUppercase: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const AsciiDigits: String = "0123456789"
+const AsciiHexdigits: String = "0123456789ABCDEF"
+const AsciiPunctuation: String =  "!\"#$%&'()*+, -./:;<=>?@[\\]^_`{|}~"
+const bar: String = "█"
+```
+
+### Methods
+
+```csharp
+// Generates a random string of a specified length using the provided character set. Defaults to a length of 25 and includes lowercase, uppercase letters, and numbers.
+// To ensure a valid string, it requires a length greater than 1 and at least one valid character. Otherwise, it returns an empty string.
+generate_random_string(length: int = 25, characters: String = AsciiAlphanumeric) -> String
+
+camel_to_snake(camel_string: String) -> String
+
+snake_to_camel_case(screaming_snake_case: String) -> String
+
+// Clean a string by removing characters that are not letters (uppercase or lowercase), numbers or spaces, tabs or newlines.
+clean(string: String, include_numbers: bool = true) -> String
+
+
+// This function wraps the provided text into multiple lines if it exceeds the specified max_line_length
+wrap_text(text: String = "", max_line_length: int = 120)
+
+
+integer_to_ordinal(number: int) -> String
+integer_to_ordinal(1) // 1st
+integer_to_ordinal(2) // 2nd
+integer_to_ordinal(3) // 3rd
+integer_to_ordinal(4) // 4th
+//...
+
+pretty_number(number: float, suffixes: Array[String] = ["", "K", "M", "B", "T"]) -> String
+
+to_binary_string(num: int) -> String
+
+strip_bbcode(source:String) -> String
+
+strip_filepaths(source: String) -> String
+
+str_replace(target: String, regex: RegEx, cb: Callable) -> String
+
+case_insensitive_comparison(one: String, two: String) -> bool
+
+is_whitespace(text: String) -> bool
+
+remove_whitespaces(text: String) -> String
+
+repeat(text: String, times: int) -> String
+
+// Returns the character "█" the amount passed as parameter
+bars(amount: int, separator: String = "") -> String
+bars(3) // "███"
+bars(3, " ") // "█ █ █"
+```
