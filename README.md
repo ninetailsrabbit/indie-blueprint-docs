@@ -18,8 +18,6 @@
 
 - [Create a new repository from template](#create-a-new-repository-from-template)
 - [Configuration](#configuration)
-  - [Default bus layout](#default-bus-layout)
-  - [Input map](#input-map)
   - [Physics layers 2D \& 3D](#physics-layers-2d--3d)
 - [Autoloads](#autoloads)
   - [GameGlobals](#gameglobals)
@@ -48,6 +46,16 @@
     - [InputControls](#inputcontrols)
     - [MotionInput](#motioninput)
       - [Example of use](#example-of-use)
+  - [Math](#math)
+    - [Constants](#constants)
+    - [Methods](#methods)
+    - [BitStream](#bitstream)
+  - [VelocityHelper](#velocityhelper)
+  - [Network](#network)
+  - [Nodes](#nodes)
+    - [Node Positioner](#node-positioner)
+    - [Node Traversal](#node-traversal)
+    - [Node Remover](#node-remover)
 
 # Create a new repository from template
 
@@ -61,7 +69,7 @@ Go to the [template](https://github.com/ninetailsrabbit/indie-blueprint) and cre
 
 This template starts with some initial configurations that you need to know to get the most out of it.
 
-## Default bus layout
+// Default bus layout
 
 There is a default bus layout to use in your project that are sufficient for any small-medium indie game, you can extend it or modify based on your use case but here's a good place to start
 
@@ -74,7 +82,7 @@ There is a default bus layout to use in your project that are sufficient for any
 - `UI`: User interface sounds, button clicks, hover, transition animations, etc.
 - `Ambient`: Ambient sounds like wind, nature, ocean, house interior and other stuff
 
-## Input map
+// Input map
 
 This project comes with very simple predefined input maps to avoid interfering with your game in a tedious way. You can use the `MotionInput` helper class to use it even more easily
 
@@ -869,5 +877,436 @@ func _physics_process(delta):
 	if motion_input.world_coordinate_space_direction.is_zero_approx():
 		velocity = velocity.lerp(Vector3.ZERO, 0.8)
 		## //...
+
+```
+
+## Math
+
+The `MathHelper` class provide methods to work more easily with mathematical operations and oriented to videogames.
+
+### Constants
+
+```csharp
+const CommonEpsilon = 0.000001  # 1.0e-6
+const PreciseEpsilon = 0.00000001  # 1.0e-8
+
+const E: float = 2.71828182845904523536028747135266249775724709369995
+const δ: float = 4.6692016091 // FEIGENBAUM CONSTANT, period-doubling bifurcation. This bifurcation describes the behavior of a system that exhibits a doubling of its periodic cycle when a certain parameter is gradually changed
+const FeigenbaumAlpha: float = 2.5029078750  // FEIGENBAUM ALPHA, another bifurcation constant
+const AperyConstant: float = 1.2020569031  // APERY'S CONSTANT, related to zeta function
+const GoldenRatio: float = 1.6180339887  // GOLDEN RATIO, (1 + sqrt(5)) / 2
+const GoldenRatioConjugate: float = 0.618033988749895 // Reciprocal of the golden ratio. In other words, it's 1/ϕ.
+const EulerMascheroniConstant: float = 0.5772156649  // EULER-MASCHERONI CONSTANT, gamma minus harmonic series
+const KhinchinsConstant: float = 2.6854520010  // KHINCHIN'S CONSTANT, optimal embedding dimension
+const GaussKuzminWirsingConstant: float = 0.3036630028  // GAUSS-KUZMIN-WIRSING CONSTANT, sphere packing
+const BernstensConstant: float = 0.2801694990  // BERNSTEIN'S CONSTANT, derivative of Dirichlet eta function
+const HafnerSarnakMcCurleyConstant: float = 0.3532363718  // HAFNER-SARNAK-MCCURLEY CONSTANT, number theory
+const MeisselMertensConstant: float = 0.2614972128  // MEISSEL-MERTENS CONSTANT, prime number distribution
+const GlaisherKinkelinConstant: float = 1.2824271291  // GLAISHER-KINKELIN CONSTANT, zeta function
+const Omega: float = 0.5671432904  // OMEGA CONSTANT, alternating harmonic series
+const GolombDickmanConstant: float = 0.6243299885  // GOLOMB-DICKMAN CONSTANT, prime number distribution
+const CahensConstant: float = 0.6434105462  // CAHEN'S CONSTANT, Diophantine approximation
+const TwinPrime: float = 0.6601618158  // TWIN PRIME CONSTANT, probability of twin prime
+const LaplaceLimit: float = 0.6627434193  // LAPLACE LIMIT, cosmic microwave background radiation
+const LandauRamanujanConstant: float = 0.7642236535  // LANDAU-RAMANUJAN CONSTANT, constant in quantum field theory
+const CatalansConstant: float = 0.9159655941  // CATALAN'S CONSTANT, sum of reciprocals of squares
+const ViswanathsConstant: float = 1.13198824  // VISWANATH'S CONSTANT, number theory
+const ConwaysConstant: float = 1.3035772690  // CONWAY'S CONSTANT, sphere packing
+const MillsConstant: float = 1.3063778838  // MILLS' CONSTANT, normal number
+const PlasticConstant: float = 1.3247179572  // PLASTIC CONSTANT, golden raio analogue
+const RamanujanSoldnerConstant: float = 1.4513692348  // RAMANUJAN-SOLDNE CONSTANT, elliptic integrals
+const BackhouseConstant: float = 1.4560749485  // BACKHOUSE'S CONSTANT, gamma function
+const PortersConstant: float = 1.4670780794  // PORTER'S CONSTANT, geometry
+const LiebsSquareIceConstant: float = 1.5396007178  // LIEB'S SQUARE ICE CONSTANT, statistical mechanics
+const ErdosBorweinConstant: float = 1.6066951524  // ERDOS-BORWEIN CONSTANT, normal number
+const NivensConstant: float = 1.7052111401  // NIVENS' CONSTANT, number theory
+const UniversalParabolicConstant: float = 2.2955871493  // UNIVERSAL PARABOLIC CONSTANT, reflection coefficient
+const SierpinskisConstant: float = 2.5849817595  // SIERPINSKI'S CONSTANT, Sierpinski triangle fractal
+const FransenRobinsonConstant: float = 2.807770 //  FRANSEN ROBINSON'S CONSTANT, It represents the area between the graph of the reciprocal Gamma function, 1/Γ(x), and the positive x-axis
+
+```
+
+### Methods
+
+```csharp
+
+// "x": This is the input value between 0 and 1 that you want to apply the bias to.
+// It could represent a probability, a random number between 0 and 1, or any other value in that range.
+// "bias": This is the bias factor, also between 0 and 1. It controls how much the function pushes the x value away from 0.5 (the center).
+// Example:
+// By adjusting the bias value, you can control how much the dice is skewed towards higher numbers.
+// A bias of 0.5 would result in a fair die roll. A bias closer to 1 would make it more likely to roll higher numbers.
+bias(x : float, _bias : float) -> float
+
+// The sigmoid function, in its most common form, produces an "S"-shaped curve. It takes any real-valued number as input and outputs a value between 0 and 1.
+// The scaling_factor parameter is a modification that allows you to adjust the steepness and midpoint of the curve, giving you more control over its behavior.
+sigmoid(x: float, scaling_factor: float = 0.0) -> float
+
+// Dease calculates a smooth, accelerating transition value over time
+// Sharpness should be a value between 0 and 1
+// -------
+// Fading Effects: Gradually fade in or out game objects, images, or the entire screen.
+// Easing Movement: Create smooth acceleration and deceleration for moving objects, such as characters or camera movements.
+// Progress Bars: Simulate the filling of progress bars with a smooth, accelerating effect.
+// Sound Volume Control: Gradually increase or decrease the volume of sound effects or music.
+// Visual Effects: Create smooth transitions for visual effects like particle systems or screen shakes.
+dease(delta: float, sharpness: float = 0.5) -> float:
+
+
+average(numbers: Array = []) -> float
+
+spread(scale: float = 1.0) -> float
+
+get_percentage(max_value: int, value: int) -> int
+
+chance(probability_chance: float = 0.5, less_than: bool = true) -> bool
+
+
+// https://en.wikipedia.org/wiki/Factorial
+// This function calculates the factorial of a given non-negative integer number. The factorial of a number n (denoted as n!) is the product of all positive integers less than or equal to n
+factorial(number)
+factorial(5) // Returns 120 (5 * 4 * 3 * 2 * 1 = 120)
+
+// This function generates an array containing the factorials of all non-negative integers from 0 up to and including the given number
+factorials_from(number) -> Array[float]:
+factorials_from(5) // Returns [1, 1, 2, 6, 24, 120]
+
+
+// Only for radians
+// If the target angle is in degrees just transform it with deg_to_rad(target_angle)
+quantize_angle_to_90(target_angle: float) -> float:
+
+// Only for radians
+angle_is_between(angle: float, start_angle: float, end_angle: float) -> bool
+
+// This function assumes that the cardinal direction is in radians unit.
+// https://en.wikipedia.org/wiki/Cardinal_direction
+angle_from_cardinal_direction(cardinal_direction: float) -> float
+
+limit_horizontal_angle(direction: Vector2, limit_angle: float) -> Vector2
+
+
+// Quaternions are a mathematical representation commonly used in 3D graphics to represent rotations.
+// Axis-angle representation specifies a rotation by an axis vector and the angle of rotation around that axis
+// Useful for Animation or Inverse Kinematics, Gimbal lock (when rotations get stuck or limited), Data storage or Transmission
+quaternion_to_axis_angle(quaternion : Quaternion) -> Quaternion
+
+//Transform from integer to roman or from roman to integer easily with this functions.
+integer_to_roman_number(number: int) -> String
+integer_to_roman_number(1994) // "MCMXCIV"
+
+roman_number_to_integer(roman_number: String) -> int
+roman_number_to_integer( "MCMXCIV") // 1994
+
+hexadecimal_to_decimal(hex: String) -> int:
+hexadecimal_to_decimal("FF") // 255
+
+decimal_to_hexadecimal(decimal: int) -> String
+decimal_to_hexadecimal(255) // "FF
+
+value_is_between(number: int, min_value: int, max_value: int, inclusive: = true) -> bool
+
+
+/**
+if value_is_between(10, 5, 15) // True, Inclusive range (default)
+	 // do stuff..
+
+if value_is_between(15, 5, 15, false):  //False, not Inclusive range
+	 // do stuff..
+*/
+
+decimal_value_is_between(number: float, min_value: float, max_value: float, inclusive: = true, precision: float = 0.00001) -> bool
+
+
+//Formats a number (integer or float) with comma separators for thousands. This improves readability for large numbers.
+// If the absolute value of the number is less than 1000, it is simply converted to a string and returned without any modification
+add_thousand_separator(number, separator: String = ",") -> String:
+
+add_thousand_separator(1000) // 1,000
+add_thousand_separator(1000000) // 1,000,000
+add_thousand_separator(9999448828) // 1,289,128,918,921
+add_thousand_separator(1289128918921, ".") // 9.999.448.828
+
+
+big_round(num: int) -> int:
+
+
+volume_of_sphere(radius: float) -> float
+
+volume_of_hollow_sphere(outer_radius: float, inner_radius: float) -> float
+
+area_of_circle(radius: float) -> float
+
+area_of_triangle(base: float, perpendicular_height: float) -> float
+
+// https://stackoverflow.com/questions/1073336/circle-line-segment-collision-detection-algorithm
+segment_circle_intersects(start, end, center, radius) -> Array
+
+// Returns intersection point(s) of a segment from 'a' to 'b' with a given rect, in order of increasing distance from 'a'
+segment_rect_intersects(a, b, rect) -> Array
+
+// https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Rectangle_difference
+rect_difference(r1: Rect2, r2: Rect2) -> Array
+
+
+random_byte() -> int
+
+logbi(x: int, base: int = 10) -> int
+
+logb(x: float, base: float = 10.0) -> float
+
+generate_random_seed(seed_range: int = 10) -> String
+```
+
+### BitStream
+
+The BitStream class offers a powerful tool for working with data in a bit-oriented manner. It allows you to efficiently pack and unpack integer values and strings into a compact format, saving memory and potentially improving performance compared to traditional string storage.
+
+**_This is not a static class, you need to instantiate a new class for each bitstream you want to manipulate._**
+
+```csharp
+
+var bits: Array
+var current_bit = 0
+
+
+//Packs an integer value (value) within a specified range (range_max) into the bit stream, converting it into individual bits.
+push(value: int, range_max: int)
+
+ //Appends a single bit _(True or False)_ to the bit stream.
+push_bit(bit: bool)
+
+// Reads and unpacks an integer value within a specified range (range_max) from the bit stream, interpreting the next num_bits as the value.
+pull(range_max:int)
+
+//Convert the bit stream to and from a Godot string format for basic data exchange.
+to_godot_string(), from_godot_string(string: String)
+
+//Prints a human-readable representation of the bit stream as a sequence of 0s and 1s for debugging.
+pprint():
+
+//Convert the bit stream to and from a packed byte array for more advanced manipulation.
+to_byte_array() -> PackedByteArray
+from_byte_array(byte_array: PackedByteArray) -> Bitstream
+
+//  Convert the bit stream to and from UTF-8 encoded text, allowing storage in a file or transmission over a network.
+to_utf8() -> String
+from_utf8(utf8_string: String) -> Bitstream
+
+// Convert the bit stream to and from an ASCII string representation.
+to_ascii_string() -> String
+from_ascii_string(string: String) -> Bitstream
+
+//  Reads a string of 0s and 1s and interprets it as a bit stream, initializing the internal data.
+from_string(string: String)
+
+```
+
+The BitStream can be used in a lot of places, here we provide a super minimal example but if you understand the concept you can easily transmit a lot of data via network using bitstreams instead of plain text
+
+**Here's the Godot script code example using the BitStream class for the multiplayer communication scenario:**
+
+`Server side`
+
+```swift
+extends Node
+
+var clients = {}  # Dictionary to store BitStream instances for connected clients
+
+func _on_player_connected(player_id):
+	clients[player_id] = BitStream.new()
+
+func _on_player_disconnected(player_id):
+	clients.erase(player_id)
+
+func _on_player_position_changed(player_id, position):
+	var bitstream = clients[player_id]
+	bitstream.push(position.x, 1024)
+	bitstream.push(position.y, 512)
+	# Send data to client (replace with your network communication method)
+	var data = bitstream.to_byte_array()
+	# ... send data to player_id ...
+
+func _on_player_health_changed(player_id, health):
+	var bitstream = clients[player_id]
+	bitstream.push(health, 256)
+	# Send data to client (replace with your network communication method)
+	var data = bitstream.to_byte_array()
+	# ... send data to player_id ..
+```
+
+`Client-Side`
+
+```swift
+extends Node
+
+var server_bitstream = BitStream.new()  # BitStream for receiving data from server
+
+func _on_server_data_received(data):
+	server_bitstream.from_byte_array(data)
+	var player_x = server_bitstream.pull(1024)
+	var player_y = server_bitstream.pull(512)
+	var player_health = server_bitstream.pull(256)
+	# Update player position and health based on received data
+	# ... update
+
+```
+
+## VelocityHelper
+
+The `VelocityHelper` class helps to work with units of measurement related to velocity
+
+```swift
+class_name VelocityHelper
+
+enum SpeedUnit {
+	KilometersPerHour,
+	MilesPerHour,
+}
+
+// It can receive a Vector2 & Vector3 as velocity and it will return the speed on the unit selected (Km or Miles)
+current_speed_on(speed_unit: SpeedUnit, velocity) -> float:
+
+// Alternatively, you can use the corresponding function for the desired velocity unit
+current_speed_on_miles_per_hour(velocity) -> float:
+
+current_speed_on_kilometers_per_hour(velocity) -> float:
+
+
+```
+
+## Network
+
+The `NetworkHelper` class provide functions that have to do with network operations
+
+```swift
+get_local_ip(ip_type: IP.Type = IP.Type.TYPE_IPV4) -> String:
+
+is_valid_url(url: String) -> bool
+
+// If the url is valid open a external link, when it detects that the current platform where is running the game is "Web' the url is encoded
+open_external_link(url: String) -> void
+
+```
+
+## Nodes
+
+This node helpers are static classes in Godot that acts as your toolbox for simplifying common node operations. It provides convenient methods to handle tasks you'd typically perform using native methods like direction_to and distance_to. However, offers a more user-friendly approach: instead of working directly with vectors, you can interact with nodes themselves.
+
+hink of it as syntactic sugar – it sweetens the code by allowing you to reference nodes directly, making your code more readable and easier to maintain.
+
+Here's a breakdown of the benefits:
+
+- **Simplified Node Operations:** Forget complex vector calculations! NodeWizard lets you interact with nodes directly, streamlining your code.
+- **Improved Readability:** Code that references nodes by name is easier to understand and follow.
+- **Reduced Error Potential:** Working directly with nodes can minimize errors that might arise from manual vector calculations
+
+### Node Positioner
+
+The `NodePositioner` class helps to simplify operations related to node positioning
+
+```csharp
+local_direction_to_v2(a: Node2D, b: Node2D) -> Vector2
+local_direction_to_v3(a: Node3D, b: Node3D) -> Vector3
+
+global_direction_to_v2(a: Node2D, b: Node2D) -> Vector2
+global_direction_to_v3(a: Node3D, b: Node3D) -> Vector3
+
+local_distance_to_v2(a: Node2D, b: Node2D) -> float
+local_distance_to_v3(a: Node3D, b: Node3D) -> float
+
+global_distance_to_v2(a: Node2D, b: Node2D) -> float
+global_distance_to_v3(a: Node2D, b: Node2D) -> float
+
+
+mouse_grid_snap(node: Node2D, size: int, use_local_position: bool = false) -> Vector2
+
+mouse_grid_snap_by_texture(sprite: Sprite2D, use_local_position: bool = false) -> Vector2
+
+// Use on _process or _physic_process
+rotate_toward_v2(from: Node2D, to: Node2D, lerp_weight: float = 0.5) -> void
+// Use on _process or _physic_process
+rotate_toward_v3(from: Node3D, to: Node3D, lerp_weight: float = 0.5) -> void
+
+align_nodes_v2(from: Node2D, to: Node2D, align_position: bool = true, align_rotation: bool = true) -> void
+
+align_nodes_v3(from: Node3D, to: Node3D, align_position: bool = true, align_rotation: bool = true) -> void
+
+
+// These functions help you locate nodes within a specific distance range relative to a given point. The nodes in the array needs to inherit from Node2D or Node3D as they have global_position vectors in the world although these functions internally apply the necessary filters to only work with valid nodes.
+
+// All this distance functions return a dictionary with two keys:
+// -------
+// - target: The nearest/farthest node found within the distance range (or null if none is found).
+// - distance: The distance between the from point and the found node (or null if none is found).
+// -------
+
+get_nearest_node_by_distance(from: Vector2, nodes: Array = [], min_distance: float = 0.0, max_range: float = 9999) -> Dictionary
+
+get_nearest_nodes_sorted_by_distance(from: Vector2, nodes: Array = [], min_distance: float = 0.0, max_range: float = 9999) -> Array
+
+get_farthest_node_by_distance(from: Vector2, nodes: Array = [], min_distance: float = 0.0, max_range: float = 9999) -> Dictionary
+
+```
+
+### Node Traversal
+
+The `NodeTraversal` class helps to simplify operations related to traverse the `SceneTree`
+
+```csharp
+// Useful when you need to add a node in the scene tree in your @tool scripts.
+// It checks for you if the Engine.is_editor_hint()
+set_owner_to_edited_scene_root(node: Node) -> void
+
+get_all_children(from_node: Node) -> Array:
+get_all_ancestors(from_node: Node) -> Array:
+
+//Only works for native nodes that Godot provides like Area2D, Camera2D, etc.
+//Example NodePositioner.find_nodes_of_type(self, Sprite2D.new())
+find_nodes_of_type(node: Node, type_to_find: Node) -> Array
+first_node_of_type(node: Node, type_to_find: Node) -> Array
+
+// Only works for native custom class not for GDScriptNativeClass
+// Example NodePositioner.find_nodes_of_custom_class(self, MachineState)
+find_nodes_of_custom_class(node: Node, class_to_find: Variant) -> Array:
+first_node_of_custom_class(node: Node, class_to_find: GDScript):
+
+// Get the tree depth from a node so you can know how deep is on the current scene.
+get_tree_depth(node: Node) -> int
+
+get_absolute_z_index(node: Node2D) -> int
+
+// This function simplifies your life by grabbing the first child node from a parent node, just like picking the firsts item from a list.
+get_first_child(node: Node):
+
+// This function simplifies your life by grabbing the last child node from a parent node, just like picking the last item from a list.
+get_last_child(node: Node)
+
+first_child_node_in_group(node: Node, group: String)
+
+hide_nodes(nodes: Array[Node] = []) -> void
+show_nodes(nodes: Array[Node] = []) -> void
+
+add_all_childrens_to_group(node: Node, group: String, filter: Array[Node] = []) -> void
+remove_all_childrens_from_group(node: Node, group: String, filter: Array[Node] = []) -> void:
+
+add_meta_to_all_children(node: Node, meta: String, value: Variant, filter: Array[Node] = []) -> void
+remove_meta_from_all_children(node: Node, meta: String) -> void
+```
+
+### Node Remover
+
+The `NodeRemover` class helps to simplify operations related to node removal
+
+```csharp
+// A safe function to remove only valid nodes
+remove(node: Node) -> void
+
+// Both functions help you declutter your scene by removing all child nodes from a parent node. They handle the cleanup process efficiently, so you don't have to write repetitive code.
+//Exceptions are passed as [Area3D.new().get_class)
+//
+remove_and_queue_free_children(node: Node) -> void
+queue_free_children(node: Node) -> void
+free_children(node: Node, except: Array = []) -> void:
 
 ```
