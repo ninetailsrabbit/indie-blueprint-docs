@@ -22,11 +22,14 @@
   - [Input map](#input-map)
   - [Physics layers 2D \& 3D](#physics-layers-2d--3d)
 - [Autoloads](#autoloads)
-  - [GameGlobals \& GlobalGameEvents](#gameglobals--globalgameevents)
+  - [GameGlobals](#gameglobals)
+    - [Delay func](#delay-func)
+    - [Wait](#wait)
+  - [GlobalGameEvents](#globalgameevents)
   - [WindowManager](#windowmanager)
     - [Resolutions](#resolutions)
-    - [Screen methods](#screen-methods)
-    - [Screenshot](#screenshot)
+    - [Screen](#screen)
+    - [Screenshots](#screenshots)
     - [Parallax](#parallax)
 - [Utilities](#utilities)
   - [File handling](#file-handling)
@@ -38,7 +41,7 @@
     - [Auto-Discover quality preset](#auto-discover-quality-preset)
   - [Input](#input)
     - [InputHelper](#inputhelper)
-    - [TransformedInput](#transformedinput)
+    - [MotionInput](#motioninput)
       - [Example of use](#example-of-use)
 
 # Create a new repository from template
@@ -68,11 +71,14 @@ There is a default bus layout to use in your project that are sufficient for any
 
 ## Input map
 
-This project comes with very simple predefined input maps to avoid interfering with your game in a tedious way
+This project comes with very simple predefined input maps to avoid interfering with your game in a tedious way. You can use the `MotionInput` helper class to use it even more easily
 
+- All the inputs have gamepad support
 - `WASD` movement with the keys `move_forward`, `move_back`, `move_right`, `move_left`
 - `WASD` keys as been added to the existing ui input maps `ui_up`, `ui_down`, `ui_right`, `ui_left`
 - The input action `debug_metrics` **_Shift+P_** opens the performance metrics when `hardware_information.tscn` it's on the scene tree
+- Pause with `P`
+- Interact with `E`
 
 ## Physics layers 2D & 3D
 
@@ -80,12 +86,18 @@ This project comes with very simple predefined input maps to avoid interfering w
 - `Layer 2`: It's named **Player**
 - `Layer 3`: It's named **Enemies**
 - `Layer 4`: It's named **Hitboxes**, `hitboxes` are collision areas that `hurtboxes` detects to implement a damage or impact system.
+- `Layer 5`: It's named **Shakeables** and is used by `TraumaCauser & TraumaDetector` that can apply a shaking effect to the camera.
+- `Layer 6`: It's named **Interactables**
+- `Layer 7`: It's named **Grabbables**
+- `Layer 8`: It's named **Bullets**
+- `Layer 9`: It's named **Playing cards**
+- `Layer 10`: It's named **Ladders**
 
 # Autoloads
 
 A bunch of autoloads are ready to use for common operation in videogames to manage audio, global variables, signals, gamepad support, persistence, etc.
 
-## GameGlobals & GlobalGameEvents
+## GameGlobals
 
 This singletons works to share data across nodes, they are always on the scene tree and can be accesed anywhere.
 
@@ -95,17 +107,59 @@ This singletons works to share data across nodes, they are always on the scene t
 extends Node
 
 
-#region Physics layers
 const world_collision_layer: int = 1
 const player_collision_layer: int = 2
 const enemies_collision_layer: int = 4
 const hitboxes_collision_layer: int = 8
+const shakeables_collision_layer: int = 16
+const interactables_collision_layer: int = 32
+const grabbables_collision_layer: int = 64
+const bullets_collision_layer: int = 128
+const playing_cards_collision_layer: int = 256
+const ladders_collision_layer: int = 512
+
+
+// Example with lambda -> GameGlobals.delay_func(func(): print("test"), 1.5)
+// Example with arguments -> GameGlobals.delay_func(print_text.bind("test"), 2.0)
+func delay_func(callable: Callable, time: float, deferred: bool = true):
+	if callable.is_valid():
+		await wait(time)
+
+		if deferred:
+			callable.call_deferred()
+		else:
+			callable.call()
+
+// Example of use: await GameGlobals.wait(1.5)
+func wait(seconds: float = 1.0):
+	return get_tree().create_timer(seconds).timeout
+
 #endregion
-
-
 ```
 
-`GlobalGameEvents` contains all the global signals by which any node or script can connect. It contains few basic ones and this is where you should place those events that you want multiple nodes to listen to
+### Delay func
+
+You can delay any function call by an amount of time:
+
+```swift
+// An anonymous lambda delayed by 1.5 seconds
+GameGlobals.delay_func(func(): print("test"), 1.5)
+
+// An existing function that needs arguments delaying by 2 seconds
+GameGlobals.delay_func(print_text.bind("test"), 2.0)
+```
+
+### Wait
+
+You can create a time delay in any line of code, just use the function wait like:
+
+```swift
+`GameGlobals.wait(2.5) // Waits 2.5 seconds before continue the execution
+```
+
+## GlobalGameEvents
+
+`GlobalGameEvents` contains all the global signals by which any node or script can connect. It contains few basic ones and this is where you should place those events that you want multiple nodes to listen to.
 
 ## WindowManager
 
@@ -118,12 +172,16 @@ One of the most important and allows you to have control of the game windows as 
 There is multiple constants defined in this manager to get the resolutions from a specific aspect-ratio, this are:
 
 ```swift
-// Use the built-in methods to get resolutions, this methods support a boolean variable to limit the resolutions based on the player current monitor
+// Use the built-in methods to get resolutions, this methods can receive a boolean variable use_computer_screen_limit to limit the resolutions based on the player current monitor
+
 WindowManager.get_mobile_resolutions()
 WindowManager.get_4_3_resolutions()
 WindowManager.get_16_9_resolutions()
 WindowManager.get_16_10_resolutions()
 WindowManager.get_21_9_resolutions()
+WindowManager.get_integer_scaling_resolutions()
+
+WindowManager.get_16_9_resolutions(true) // Return the resolutions limited by the current monitor
 
 // List of available resolutions
 var resolutions: Dictionary = {
@@ -182,50 +240,63 @@ var resolutions: Dictionary = {
 		Vector2i(3840, 2160), # 4K
 		Vector2i(5120, 2880),
 		Vector2i(7680, 4320), # 8K
+	],
+	IntegerScalingResolutions: [
+		Vector2(320, 180),
+		Vector2(640, 360),
+		Vector2(960, 540),
+		Vector2(1280, 720),
+		Vector2(1600, 900),
+		Vector2(1920, 1080),
 	]
 }
 
 ```
 
-### Screen methods
+### Screen
 
-`center_window_position(viewport: Viewport = get_viewport()) -> void`
+```swift
+//Center the window position based on the monitor screen _(not the viewport)_. This is called automatically when the size_changed signal is emitted so there is no reason to use it individually.
+center_window_position(viewport: Viewport = get_viewport()) -> void
 
-Center the window position based on the monitor screen _(not the viewport)_. This is called automatically when the `size_changed` signal is emitted so there is no reason to use it individually.
+// Get the center of the viewport screen in the world
+screen_center() -> Vector2i
 
-`screen_center() -> Vector2i`
+//Center of the current PC screen monitor
+monitor_screen_center() -> Vector2i
 
-Get the center of the viewport screen in the world
+// Get the frame rect where the current active Camera2D is on the screen, useful to see which elements are inside the camera and can be visible.
+get_camera2d_frame(viewport: Viewport = get_viewport()) -> Rect2
+```
 
-`monitor_screen_center() -> Vector2i:`
+### Screenshots
 
-Center of the current PC screen monitor
+```swift
+// Take a screenshot of the current viewport and return it as an [Image](https://docs.godotengine.org/en/stable/classes/class_image.html) class
+screenshot(viewport: Viewport) -> Image
 
-`get_camera2d_frame(viewport: Viewport = get_viewport()) -> Rect2`
+// Take a screenshot of the current viewport and insert it as a texture into a [TextureRect](https://docs.godotengine.org/en/stable/classes/class_texturerect.html) node
+screenshot_to_texture_rect(viewport: Viewport, texture_rect: TextureRect = TextureRect.new()) -> TextureRect
 
-Get the frame rect where the current active `Camera2D` is on the screen, useful to see which elements are inside the camera and can be visible.
-
-### Screenshot
-
-`screenshot(viewport: Viewport) -> Image`
-
-Take a screenshot of the current viewport and return it as an [Image](https://docs.godotengine.org/en/stable/classes/class_image.html) class
-
-`screenshot_to_texture_rect(viewport: Viewport, texture_rect: TextureRect = TextureRect.new()) -> TextureRect`
-
-Take a screenshot of the current viewport and insert it as a texture into a [TextureRect](https://docs.godotengine.org/en/stable/classes/class_texturerect.html) node
+// Take a screenshot of the current viewport and save it as a `.png` into the folder path passed as parameter, by default uses `OS.get_user_data_dir()` which returns the path to the current user folder according to the operating system.
+screenshot_to_folder(folder: String = "%s/screenshots" % [OS.get_user_data_dir()], viewport: Viewport = get_viewport()) -> Error:
+```
 
 ### Parallax
 
 These methods automatically adapt the appropriate parallax size according to the current screen resolution. It supports the old [ParallaxBackground](https://docs.godotengine.org/en/stable/classes/class_parallaxbackground.html) and the new [Parallax2D](https://docs.godotengine.org/en/stable/classes/class_parallax2d.html)
 
-`adapt_parallax_background_to_horizontal_viewport(parallax_background: ParallaxBackground, viewport: Rect2 = get_window().get_visible_rect()) -> void`
+```swift
+// Old Parallax node
+adapt_parallax_background_to_horizontal_viewport(parallax_background: ParallaxBackground, viewport: Rect2 = get_window().get_visible_rect()) -> void
 
-`adapt_parallax_background_to_vertical_viewport(parallax_background: ParallaxBackground, viewport: Rect2 = get_window().get_visible_rect()) -> void`
+adapt_parallax_background_to_vertical_viewport(parallax_background: ParallaxBackground, viewport: Rect2 = get_window().get_visible_rect()) -> void
 
-`adapt_parallax_to_horizontal_viewport(parallax: Parallax2D, viewport: Rect2 = get_window().get_visible_rect()) -> void`
+// New Parallax node
+adapt_parallax_to_horizontal_viewport(parallax: Parallax2D, viewport: Rect2 = get_window().get_visible_rect()) -> void
 
-`adapt_parallax_to_vertical_viewport(parallax: Parallax2D, viewport: Rect2 = get_window().get_visible_rect()) -> void`
+adapt_parallax_to_vertical_viewport(parallax: Parallax2D, viewport: Rect2 = get_window().get_visible_rect()) -> void
+```
 
 # Utilities
 
@@ -579,7 +650,7 @@ Get all joypad input events defined in the `InputMap` for the given action name,
 
 Get the first joypad input for the given action that exists in the `InputMap`
 
-### TransformedInput
+### MotionInput
 
 This class simplifies handling and transforming player input directions in your Godot games. It provides various properties and functions to access and manipulate input based on your needs.
 
@@ -593,7 +664,7 @@ This class simplifies handling and transforming player input directions in your 
   - **Deadzone-applied Horizontal/Vertical Axes:** Provides separate horizontal and vertical axes with the deadzone applied.
   - **World Coordinate Space Direction (3D Only):** In 3D scenes, calculates the input direction in the actor's world coordinate space for movement calculations.
 
-A new `TransformedInputn` can receive this parameters on the constructor:
+A new `MotionInputn` can receive this parameters on the constructor:
 
 - `actor (Node)`: A reference to the actor _(either Node2D or Node3D)_ from which the input is retrieved.
 - `deadzone (float)`: Controls the deadzone size _(range: 0.0 to 1.0)_. Higher values create a larger deadzone.
@@ -603,7 +674,7 @@ The only function you need to use from this class is `update()` that **save the 
 By default it uses this inputs action names that comes preconfigured on this template, if you want to use other names just change the variables or use the set methods `change_move_[DIRECTION]_action(new_action: String)` in the class:
 
 ```csharp
-class_name TransformedInput
+class_name MotionInput
 
 var move_right_action: String = "move_right"
 var move_left_action: String = "move_left"
@@ -644,7 +715,7 @@ var previous_world_coordinate_space_direction: Vector3
 ```csharp
 class_name FirstPersonController extends CharacterBody3D
 
-var motion_input = TransformedInput.new(self)
+var motion_input = MotionInput.new(self)
 
 ## //...
 
