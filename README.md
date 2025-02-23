@@ -29,6 +29,21 @@
     - [Screen](#screen)
     - [Screenshots](#screenshots)
     - [Parallax](#parallax)
+  - [Audio](#audio)
+    - [AudioManager](#audiomanager)
+      - [Automatic unmute \& mute buses on application focus in \& out](#automatic-unmute--mute-buses-on-application-focus-in--out)
+      - [Bus](#bus)
+      - [Default audio volumes](#default-audio-volumes)
+      - [Handling volume](#handling-volume)
+      - [Audio effects](#audio-effects)
+    - [MusicManager](#musicmanager)
+      - [MusicTrack](#musictrack)
+      - [MusicPlaylist](#musicplaylist)
+      - [Signals](#signals)
+      - [Music bank](#music-bank)
+      - [Play modes](#play-modes)
+      - [Playlists](#playlists)
+    - [SoundPool](#soundpool)
 - [Utilities](#utilities)
   - [Collisions](#collisions)
   - [Color](#color)
@@ -325,6 +340,268 @@ adapt_parallax_to_horizontal_viewport(parallax: Parallax2D, viewport: Rect2 = ge
 
 adapt_parallax_to_vertical_viewport(parallax: Parallax2D, viewport: Rect2 = get_window().get_visible_rect()) -> void
 ```
+
+## Audio
+
+This autoloads are intended to manage all audio related things in your game, changing volume, playlist, crossfade between streams, sound pool and much more.
+
+### AudioManager
+
+This autoload is intended for the most basic operations such as getting bus information, changing the volume and so on.
+The available buses are based on the default bus layout provided in this template that you can find in the [Configuration](#configuration) section.
+
+#### Automatic unmute & mute buses on application focus in & out
+
+The buses are muted automatically when your game executable is not being focused when for example the player may have left with the windows key to look at the desktop.
+
+```swift
+func _notification(what):
+	match what:
+		NOTIFICATION_APPLICATION_FOCUS_OUT:
+			mute_all_buses()
+		NOTIFICATION_APPLICATION_FOCUS_IN:
+			unmute_all_buses()
+```
+
+#### Bus
+
+```csharp
+// Available constants
+const MasterBusIndex = 0
+
+const MasterBus: StringName = &"Master"
+const MusicBus: StringName = &"Music"
+const SFXBus: StringName = &"SFX"
+const EchoSFXBus: StringName = &"EchoSFX"
+const VoiceBus: StringName = &"Voice"
+const UIBus: StringName = &"UI"
+const AmbientBus: StringName = &"Ambient"
+
+// Available get methods that returns the bus index
+master_bus() -> int
+
+music_bus() -> int
+
+sfx_bus() -> int
+
+echosfx_bus() -> int
+
+voice_bus() -> int
+
+ui_bus() -> int
+
+ambient_bus() -> int
+```
+
+#### Default audio volumes
+
+This template set an opinionated default volumes but feel free to change this dictionary in the `AudioManager` to fit your requirements. These values are loaded the first time you start your game or reset to default values.
+
+```swift
+static var default_audio_volumes: Dictionary = {
+	MasterBus.to_lower(): 0.9,
+	MusicBus.to_lower(): 0.8,
+	SFXBus.to_lower(): 0.9,
+	EchoSFXBus.to_lower(): 0.9,
+	VoiceBus.to_lower(): 0.8,
+	UIBus.to_lower(): 0.7,
+	AmbientBus.to_lower(): 0.9
+}
+
+// In addition, you can access the default bus volume value with the following method
+AudioManager.get_default_volume_for_bus(bus) // Where bus can be received as int or String.
+
+// Reset current bus volumes to default
+reset_to_default_volumes() -> void
+
+```
+
+#### Handling volume
+
+The `AudioManager` provides few methods to operate with volume in an easy way. The bus parameter can be passed as the integer index or String
+
+```csharp
+
+get_default_volume_for_bus(bus) -> float:
+
+// Change the volume of selected bus_index if it exists
+change_volume(bus, volume_value: float) -> void
+
+get_actual_volume_db_from_bus(bus) -> float
+
+get_actual_volume_db_from_bus_name(bus_name: String) -> float
+
+get_actual_volume_db_from_bus_index(bus_index: int) -> float
+
+all_buses_are_muted() -> bool
+
+is_muted(bus = MasterBusIndex) -> bool
+
+mute_bus(bus, mute_flag: bool = true) -> void
+
+mute_all_buses() -> void
+
+unmute_all_buses() -> void
+```
+
+#### Audio effects
+
+The buses have some effect filters already set up. To activate them you can use the following methods:
+
+```csharp
+apply_master_bus_low_pass_filter() -> void
+
+remove_master_bus_low_pass_filter() -> void
+
+apply_master_bus_chorus_filter() -> void
+
+remove_master_bus_chorus_filter() -> void
+
+apply_master_bus_phaser_filter() -> void
+
+remove_master_bus_phaser_filter() -> void
+```
+
+### MusicManager
+
+The `MusicManager` autoload provides methods to play music that is persistent between scenes in your game. It has support for playlist and crossfade between streams.
+
+The `default_crossfade_time` is `5`
+
+It works with 2 basic Resources `MusicTrack` and `MusicPlaylist` that are very easy to create and configure for reuse between your projects.
+
+#### MusicTrack
+
+```swift
+class_name MusicTrack extends Resource
+
+@export var track_name: StringName = &""
+@export var artist: StringName = &""
+@export var stream: AudioStream
+@export var bus: StringName
+
+
+func _init(_stream: AudioStream, _name: StringName = &"", _artist: StringName = &"", _bus: StringName = AudioManager.MusicBus) -> void
+```
+
+#### MusicPlaylist
+
+```swift
+class_name MusicPlaylist extends Resource
+
+@export var playlist_name: StringName = &""
+@export var tracks: Array[MusicTrack]
+
+
+func _init(_name: StringName = &"", _tracks: Array[MusicTrack] = []) -> void
+```
+
+#### Signals
+
+```swift
+changed_play_mode(new_mode: PlayMode)
+
+added_track_to_music_bank(track: MusicTrack)
+removed_track_from_music_bank(track: MusicTrack)
+
+changed_track(from: MusicTrack, to: MusicTrack)
+started_track(new_track: MusicTrack)
+finished_track(track: MusicTrack)
+
+created_playlist(playlist: MusicPlaylist)
+removed_playlist(playlist: MusicPlaylist)
+changed_playlist(from: MusicPlaylist, to: MusicPlaylist)
+started_playlist(playlist: MusicPlaylist)
+finished_playlist(playlist: MusicPlaylist)
+```
+
+#### Music bank
+
+A music bank is an array of music tracks available in your music manager. If the stream is not here for the manager it does not exist.
+
+```swift
+var music_bank: Array[MusicTrack] = []
+
+// Available methods to manipulate tracks
+add_music_tracks_to_bank(tracks: Array[MusicTrack])
+
+add_music_track_to_bank(track: MusicTrack)
+
+remove_track_from_bank(track: MusicTrack)
+
+remove_tracks_from_bank(tracks: Array[MusicTrack])
+
+
+pause_current_track() -> void
+
+replay_current_track() -> void
+
+play_music_from_bank(track, crossfade: bool = true, crossfade_time: float = default_crossfade_time)
+
+pick_random_track_from_bank(except: Array[MusicTrack]= []) -> MusicTrack
+
+get_music_from_bank(track_name: StringName) -> MusicTrack
+
+// Syntactic sugar to play a music track, it calls play_music_from_bank behind the scenes
+change_track_to(new_stream_name: String, crossfade: bool = true, crossfade_time: float = default_crossfade_time) -> void
+
+change_track(new_stream_name: String, crossfade: bool = true, crossfade_time: float = default_crossfade_time) -> void
+
+change_music(new_stream_name: String, crossfade: bool = true, crossfade_time: float = default_crossfade_time) -> void
+
+change_music_to(new_stream_name: String, crossfade: bool = true, crossfade_time: float = default_crossfade_time) -> void
+```
+
+#### Play modes
+
+The `MusicManager` is played based on the selected `PlayMode`. By default is set to `PlayMode.Manual`
+
+```swift
+enum PlayMode {
+	Manual, // The music tracks are manually initiated somewhere in your code
+	RandomMusicFromBank, // Once a stream ends, get another random stream from the music bank.
+	Playlist // Uses a playlist provided in which song s are played sequentially.
+}
+
+// Update
+change_mode_to_manual() -> void
+
+change_mode_to_random_music_from_bank() -> void
+
+change_mode_to_playlist() -> void
+
+change_mode(new_play_mode: PlayMode) -> void
+
+// Get
+is_manual_mode() -> bool
+
+is_random_music_mode() -> bool
+
+is_playlist_mode() -> bool
+```
+
+#### Playlists
+
+This manager allows you to create multiple playlists and select them in a very easy way. You can pass the playlist parameter as its id or the `MusicPlaylist` resource as such.
+
+```swift
+
+// Dictionary<String, MusicPlaylist>
+var music_playlists: Dictionary = {}
+
+
+start_playlist(playlist, from_track: int = 0, crossfade: bool = true, crossfade_time: float = default_crossfade_time) -> void
+
+add_playlist(playlist: MusicPlaylist) -> void
+
+remove_playlist(playlist) -> void
+
+play_next_in_playlist(playlist: MusicPlaylist = current_playlist) -> void
+
+next_in_playlist(playlist: MusicPlaylist = current_playlist) -> MusicTrack
+```
+
+### SoundPool
 
 # Utilities
 
