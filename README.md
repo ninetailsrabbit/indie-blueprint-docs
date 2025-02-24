@@ -61,6 +61,13 @@
     - [Signals](#signals-2)
     - [How to use](#how-to-use-1)
     - [Transition steps](#transition-steps)
+  - [Content 📜](#content-)
+    - [Censorer](#censorer)
+    - [Preloader](#preloader)
+  - [Global Effects ✨](#global-effects-)
+    - [Fade in \& out](#fade-in--out)
+    - [Flash](#flash)
+    - [Frame Freeze](#frame-freeze)
 - [Utilities 🧰](#utilities-)
   - [Collisions 💥](#collisions-)
   - [Color 🎨](#color-)
@@ -888,6 +895,104 @@ func transition_to_first_camera_via_all_steps_3d(clean_steps_on_finished: bool =
 is_transitioning_2d() -> bool
 
 is_transitioning_3d() -> bool
+```
+
+## Content 📜
+
+Autoloads to manipulate content and assets of your game.
+
+### Censorer
+
+The `Censorer` autoload allows you to censor offensive content in your game texts. Useful for information received from players.
+
+**_Currently only supports English and Russian_**
+
+```swift
+// Returns a list of texts with the censor filter applied
+static func filter_list(texts: Array[String] = [], censor_character: String = "*") -> Array[String]
+
+// Return a text with the censor filter applied
+static func filter(text: String, censor_character: String = "*") -> String
+```
+
+### Preloader
+
+The `Preloader` autoload take advantage of [preload](https://docs.godotengine.org/en/stable/classes/class_@gdscript.html#class-gdscript-method-preload) function. This autoload is the place to centralise all the assets and resources your game needs.
+
+Just preload once on game initialization and have them available always in the game.
+
+```swift
+// In this singleton will live all the preloads for your game, shaders, scenes, audio streams, etc.
+// Just preload once on game initialization and have them available always in the game
+class_name Preloader
+
+// Pixel Art UI Layout
+const WorldSelectionScene: PackedScene = preload("res://ui/menus/layouts/pixel_art/world_selection.tscn")
+const WorldSaveSlotPanelScene: PackedScene = preload("res://ui/menus/layouts/pixel_art/components/world_save_slot_panel.tscn")
+```
+
+## Global Effects ✨
+
+The `GlobalEffects` autoload located in `res://autoload/effects/global_effects.tscn` contains a few screen effects commonly used in game dev are available for quick use.
+
+This autoload scene contains few parameters which are used as default values when no arguments are passed to functions.
+
+![global_effects_parameters](images/global_effects_default.png)
+
+### Fade in & out
+
+Widely used for changing scenes or reflecting changes in an action. When the effect is finished, the used nodes are removed from the tree.
+
+```swift
+// When out_duration or out_color are not provided, is assigned the values of in_duration and in_color respectively
+func fade_in_out(
+	in_duration: float = default_fade_duration,
+	in_color: Color = default_fade_color,
+	out_duration: float = 0.0,
+	out_color = null
+	) -> void:
+
+
+// When in_duration or in_color are not provided, is assigned the values of out_duration and out_color respectively
+func fade_out_in(
+	out_duration: float = default_fade_duration,
+	out_color: Color = default_fade_color,
+	in_duration: float = 0.0,
+	in_color = null
+	) -> void:
+```
+
+### Flash
+
+A quick screen colour display that can be used multiple times. When the effect is finished, the used nodes are removed from the tree.
+
+```swift
+func flash(
+	color: Color = default_flash_color,
+	duration: float = default_flash_duration,
+	initial_transparency: int = default_flash_transparency
+) -> ColorRect:
+
+
+func flashes(
+	colors: PackedColorArray = [],
+	flash_duration: float = default_flash_duration,
+	initial_transparency: int = default_flash_transparency
+) -> Array[ColorRect]:
+```
+
+### Frame Freeze
+
+Start a frame freeze in the scene to simulate slow-motion effects. You can provide the time scale (> 1 faster, < 1 sloow), the duration and enable frame freeze effect also for the audio.
+
+Only one frame freeze can be active, you have to wait for it to finish to start another one.
+
+```swift
+func frame_freeze(
+	time_scale: float = default_frame_freeze_time_scale,
+	duration: float = default_frame_freeze_duration,
+	scale_audio: bool = default_scale_audio
+) -> void:
 ```
 
 # Utilities 🧰
