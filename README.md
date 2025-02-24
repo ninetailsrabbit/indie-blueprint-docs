@@ -45,6 +45,16 @@
       - [Playlists](#playlists)
     - [SoundPool](#soundpool)
   - [ObjectPool](#objectpool)
+    - [ObjectPoolManager](#objectpoolmanager)
+      - [Signals](#signals-1)
+      - [Methods](#methods)
+    - [ObjectPool](#objectpool-1)
+      - [ObjectPoolWrapper](#objectpoolwrapper)
+      - [How to use](#how-to-use)
+        - [Editor](#editor)
+        - [GDScript](#gdscript)
+        - [Spawn](#spawn)
+        - [Kill](#kill)
 - [Utilities](#utilities)
   - [Collisions](#collisions)
   - [Color](#color)
@@ -64,7 +74,7 @@
       - [Example of use](#example-of-use)
   - [Math](#math)
     - [Constants](#constants)
-    - [Methods](#methods)
+    - [Methods](#methods-1)
     - [BitStream](#bitstream)
   - [VelocityHelper](#velocityhelper)
   - [Network](#network)
@@ -82,7 +92,7 @@
   - [Label](#label)
   - [String](#string)
     - [Constants](#constants-1)
-    - [Methods](#methods-1)
+    - [Methods](#methods-2)
   - [Time](#time)
   - [Camera2D](#camera2d)
   - [Camera3D](#camera3d)
@@ -604,7 +614,7 @@ next_in_playlist(playlist: MusicPlaylist = current_playlist) -> MusicTrack
 
 ### SoundPool
 
-A pool of `AudioStreamPlayer` globally available. You can increase or decrease the number and select the bus you want to use in each stream
+The `SoundPool` autoload provides globally available pool of `AudioStreamPlayer`. You can increase or decrease the number of the pool and play streams when become available.
 
 By default it creates **32** `AudioStreamPlayer` nodes.
 
@@ -642,6 +652,168 @@ unpause_streams_from_buses(buses: Array[String] = [AudioManager.SFXBus])
 ```
 
 ## ObjectPool
+
+The object pool pattern is a software creational design pattern that uses a set of initialized objects kept ready to use – a "pool" – rather than allocating and destroying them on demand.
+
+If you need to instantiate many nodes in your game and you find that performance suffers, this is a first step to improve it.
+
+The `ObjectPool` node allows with a small configuration to have a number of scenes available. These nodes are not deleted, they are hidden and left in a disabled process waiting to be activated again.
+
+### ObjectPoolManager
+
+The `ObjectPoolManager` autoload centralise all pools in your game to be accessed and used at any time without actually having them to be in the scene tree.
+
+#### Signals
+
+```swift
+added_pool(pool: ObjectPool)
+updated_pool(previous_pool: ObjectPool, current: ObjectPool)
+removed_pool(pool: ObjectPool)
+```
+
+#### Methods
+
+```swift
+// Dictionary[StringName, ObjectPool]
+var available_pools: Dictionary = {}
+
+func add_pool(id: StringName, pool: ObjectPool, overwrite: bool = false) -> void
+
+func update_pool(id: StringName, new_pool: ObjectPool)
+
+func get_pool(id: StringName) -> ObjectPool
+
+func remove_pool(id: StringName) -> void
+```
+
+### ObjectPool
+
+You have access to the objects in any moment from the variables
+
+```swift
+var pool: Array[ObjectPoolWrapper] = [] // Objects on wait
+var spawned: Array[ObjectPoolWrapper] = [] // Active objects
+```
+
+---
+
+![object_pool_parameters](images/object_pool_parameters.png)
+
+- **Id:** The unique identifier for this pool.
+- **Scene:** The scene to spawn
+- **Create objects on ready:** When enabled, creates the number of objects when `_ready` on the scene tree. When not, you need to call manually the function `create_pool(amount: int)`
+- **Max objects in pool:** The maximum instances of the scene available in this pool
+- **Process mode on spawn:** Select process mode for the instantiated scene when spawned from pool.
+
+---
+
+#### ObjectPoolWrapper
+
+The `ObjectPool` does not work with the original instance but instead use a `ObjectPoolWrapper` when spawning new objects. This is an intermediary to apply the pool operations in the scene instance.
+
+In principle you don't need to manually create the `ObjectPoolWrapper` for each scene yourself, the `ObjectPool` does it for you.
+
+When you no longer need the scene, instead of calling `queue_free` in the node as usual you would use the `kill()` function. This will put the object to sleep and make it disappear from the screen.
+
+If you need to remove this wrapper for some reason, it has a built-in `queue_free` function for that.
+
+```swift
+class_name ObjectPoolWrapper extends RefCounted
+
+
+var pool: ObjectPool
+var instance: Node
+var sleeping: bool = true
+
+
+func _init(_pool: ObjectPool) -> void:
+	pool = _pool
+	instance = pool.scene.instantiate()
+
+
+func kill() -> void:
+	pool.kill(self)
+
+
+func queue_free() -> void:
+	if is_instance_valid(self) and not pool.instance.is_queued_for_deletion():
+		pool.instance.queue_free()
+		free()
+```
+
+#### How to use
+
+##### Editor
+
+Add a new `ObjectPool` node to the scene and configure the parameters
+
+![object_pool_node](images/object_pool_node.png)
+
+##### GDScript
+
+You can create a new `ObjectPool` via code using the constructor:
+
+```swift
+// The constructor definition
+_init(
+	id: StringName,
+	scene: PackedScene,
+	amount: int,
+	create_on_ready: bool,
+	process_mode_on_spawn: ProcessMode
+)
+
+// Example
+@export var bullet_scene: PackedScene
+
+var my_pool: ObjectPool = ObjectPool.new(&"bullets", bullet_scene, 100, true, Node.PROCESS_MODE_INHERIT)
+
+// If create_on_ready is false, you need to manually call create_pool() when you want to initialize it
+// By default it receives the amount selected in the constructor but you can pass it a new one if you wish.
+my_pool.create_pool(100)
+```
+
+##### Spawn
+
+Note that it will always return a `ObjectPoolWrapper` and not the original instance.
+
+Spawning is very simple:
+
+```swift
+spawn() -> ObjectPoolWrapper:
+
+spawn_multiple(amount: int) -> Array[ObjectPoolWrapper]
+
+spawn_all() -> Array[ObjectPoolWrapper]:
+```
+
+##### Kill
+
+To delete instances the pool has a few methods available to it. Ideally, this method should be called directly from the `ObjectPoolWrapper`. If you want to remove it from memory and the pool use the `free()` methods
+
+```swift
+kill(spawned_object: ObjectPoolWrapper) -> void
+
+kill_multiple(spawned_objects: Array[ObjectPoolWrapper]) -> void
+
+kill_all() -> void
+
+//You can kill the object from itself
+my_spawned_object.kill()
+
+// ---------------
+
+//Free the object forever
+free_object(spawned_object: ObjectPoolWrapper) -> void
+
+free_objects(spawned_objects: Array[ObjectPoolWrapper]) -> void
+
+free_pool() -> void
+
+//You can free the object from itself
+my_spawned_object.queue_free()
+
+```
 
 # Utilities
 
