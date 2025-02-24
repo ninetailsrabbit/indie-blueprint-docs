@@ -68,6 +68,16 @@
     - [Fade in \& out](#fade-in--out)
     - [Flash](#flash)
     - [Frame Freeze](#frame-freeze)
+  - [Gamepad Controller Manager 🎮](#gamepad-controller-manager-)
+    - [Controller connected \& disconnected](#controller-connected--disconnected)
+    - [Gamepad names and buttons](#gamepad-names-and-buttons)
+    - [Current controller information](#current-controller-information)
+    - [Methods](#methods-1)
+  - [Global day \& night clock](#global-day--night-clock)
+    - [Signals](#signals-3)
+    - [Configurable parameters](#configurable-parameters)
+    - [Information](#information)
+    - [How to use](#how-to-use-2)
 - [Utilities 🧰](#utilities-)
   - [Collisions 💥](#collisions-)
   - [Color 🎨](#color-)
@@ -87,7 +97,7 @@
       - [Example of use](#example-of-use)
   - [Math 🧮](#math-)
     - [Constants](#constants)
-    - [Methods](#methods-1)
+    - [Methods](#methods-2)
   - [BitStream 💠](#bitstream-)
   - [VelocityHelper 👟](#velocityhelper-)
   - [Network 📶](#network-)
@@ -105,7 +115,7 @@
   - [Label 🏷️](#label-️)
   - [String 🔤](#string-)
     - [Constants](#constants-1)
-    - [Methods](#methods-2)
+    - [Methods](#methods-3)
   - [Time](#time)
   - [Camera2D](#camera2d)
   - [Camera3D](#camera3d)
@@ -993,6 +1003,150 @@ func frame_freeze(
 	duration: float = default_frame_freeze_duration,
 	scale_audio: bool = default_scale_audio
 ) -> void:
+```
+
+## Gamepad Controller Manager 🎮
+
+The `GamepadControllerManager` allows you to manipulate and obtain information from connected game controllers.
+
+This autoloads mainly helps you to detect gamepads connected to your game. **It does not contains actions remapping** so it's only for detection. This manager automatically detects when a joy it's connected & disconnected and update the current controller name.
+
+More information about gamepad names on [https://github.com/mdqinc/SDL_GameControllerDB]()
+
+### Controller connected & disconnected
+
+This signals are emitted when a new or existing controller is connected & disconnected
+
+```swift
+controller_connected(device_id, controller_name:String)
+controller_disconnected(device_id, previous_controller_name:String, controller_name: String)
+```
+
+### Gamepad names and buttons
+
+```swift
+const DeviceGeneric = "generic"
+const DeviceKeyboard = "keyboard"
+const DeviceXboxController = "xbox"
+const DeviceSwitchController = "switch"
+const DeviceSwitchJoyconLeftController = "switch_left_joycon"
+const DeviceSwitchJoyconRightController = "switch_right_joycon"
+const DevicePlaystationController = "playstation"
+const DeviceLunaController = "luna"
+
+const XboxButtonLabels = ["A", "B", "X", "Y", "Back", "Home", "Menu", "Left Stick", "Right Stick", "Left Shoulder", "Right Shoulder", "Up", "Down", "Left", "Right", "Share"]
+const SwitchButtonLabels = ["B", "A", "Y", "X", "-", "", "+", "Left Stick", "Right Stick", "Left Shoulder", "Right Shoulder", "Up", "Down", "Left", "Right", "Capture"]
+const PlaystationButtonLabels = ["Cross", "Circle", "Square", "Triangle", "Select", "PS", "Options", "L3", "R3", "L1", "R1", "Up", "Down", "Left", "Right", "Microphone"]
+```
+
+### Current controller information
+
+```swift
+var current_controller_guid
+var current_controller_name := DeviceKeyboard
+var current_device_id := 0
+var connected: bool = false
+```
+
+### Methods
+
+```swift
+
+func has_joypad() -> bool
+
+// Array of device ids
+func joypads() -> Array[int]
+
+
+func start_controller_vibration(weak_strength = default_vibration_strength, strong_strength = default_vibration_strength, duration = default_vibration_duration)
+
+func stop_controller_vibration()
+
+
+func current_controller_is_generic() -> bool
+
+func current_controller_is_luna() -> bool
+
+func current_controller_is_keyboard() -> bool
+
+func current_controller_is_playstation() -> bool
+
+func current_controller_is_xbox() -> bool
+
+func current_controller_is_switch() -> bool
+
+func current_controller_is_switch_joycon() -> bool
+
+func current_controller_is_switch_joycon_right() -> bool
+
+func current_controller_is_switch_joycon_left() -> bool
+```
+
+## Global day & night clock
+
+This autoload scene located in `res://autoload/general/global_day_night_clock.tscn` can be used to have a global clock in your game. Manipulate the day, hour, minutes and access this information globally.
+
+### Signals
+
+```swift
+time_tick(day: int, hour: int, minute: int)
+hour_passed
+day_passed
+```
+
+### Configurable parameters
+
+!global_clock_parameters[](images/global_clock_parameters.png)
+
+- **Emit tick signal:** Since reacting to each tick is not common, it is deactivated by default.
+- **In game speed:** This value when it's 1.0 means that one minute in real time translates into one second in-game. One day on earth is used as a reference
+- **Initial day: ** The day where to start running the clock. There is no limit value as you may be interested in keeping a count of days or the day of the year in your game.
+- ** Initial hour: ** The initial hour where to start running the clock, limited between 0 and 23
+- ** Initial minute: ** The initial minute where to start running the clock, limited between 0 and 59
+
+### Information
+
+```swift
+var current_period: String = "AM"
+var current_day: int = 0
+var current_hour: int = 0
+var current_minute: int = 0
+
+
+func total_seconds() -> int
+
+func seconds(hour: int = current_hour, minute: int = current_minute) -> int
+
+//A useful value to use in curves depending on the time of the day, where 00:00 will have a value of 9 and 23:59 a value of 1.0.
+func get_curve_value(hour: int = current_hour, minute: int = current_minute) -> float
+
+// A time display in the format hour:minute -> 13:23
+func time_display() -> String
+
+
+func is_am() -> bool
+
+func is_pm() -> bool:
+```
+
+### How to use
+
+To start clock just call the function `start` with the time of the day to start. `stop()` freezes it and calling `start()` again should restart from the stopped time.
+
+```swift
+func start(day: int = initial_day, hour: int = initial_hour, minute: int = initial_minute) -> void
+
+func stop() -> void:
+
+// Example
+GlobalDayNightClock.start(10, 12 55) // Start the clock on Day 10 at 12:55
+
+
+func change_day_to(new_day: int) -> void
+
+func change_hour_to(new_hour: int) -> void
+
+func change_minute_to(new_minute: int) -> void
 ```
 
 # Utilities 🧰
