@@ -44,6 +44,7 @@
       - [Play modes](#play-modes)
       - [Playlists](#playlists)
     - [SoundPool](#soundpool)
+  - [ObjectPool](#objectpool)
 - [Utilities](#utilities)
   - [Collisions](#collisions)
   - [Color](#color)
@@ -602,6 +603,45 @@ next_in_playlist(playlist: MusicPlaylist = current_playlist) -> MusicTrack
 ```
 
 ### SoundPool
+
+A pool of `AudioStreamPlayer` globally available. You can increase or decrease the number and select the bus you want to use in each stream
+
+By default it creates **32** `AudioStreamPlayer` nodes.
+
+```swift
+increase_pool(pool_number: int, override: bool = false)
+
+decrease_pool(pool_number: int)
+
+
+play(stream: AudioStream, volume: float = 1.0, bus: String = AudioManager.SFXBus)
+
+play_with_pitch(stream: AudioStream, volume: float = 1.0, pitch_scale: float = 1.0, bus: String = AudioManager.SFXBus)
+
+play_with_pitch_range(stream: AudioStream, volume: float = 1.0, min_pitch_scale: float = 0.9, max_pitch_scale: float = 1.3, bus: String = AudioManager.SFXBus)
+
+play_random_stream(streams: Array[AudioStream] = [], volume: float = 1.0, bus: String = AudioManager.SFXBus)
+
+play_random_stream_with_pitch(streams: Array[AudioStream] = [], volume: float = 1.0, pitch_scale: float = 1.0, bus: String = AudioManager.SFXBus)
+
+play_random_stream_with_pitch_range(streams: Array[AudioStream] = [], volume: float = 1.0, min_pitch_scale: float = 0.9, max_pitch_scale: float = 1.3,  bus: String = AudioManager.SFXBus)
+
+
+stop_streams_from_bus(bus: String = AudioManager.SFXBus)
+
+stop_streams_from_buses(buses: Array[String] = [AudioManager.SFXBus])
+
+pause_streams_from_bus(bus: String = AudioManager.SFXBus)
+
+pause_streams_from_buses(buses: Array[String] = [AudioManager.SFXBus])
+
+unpause_streams_from_bus(bus: String = AudioManager.SFXBus)
+
+unpause_streams_from_buses(buses: Array[String] = [AudioManager.SFXBus])
+
+```
+
+## ObjectPool
 
 # Utilities
 
