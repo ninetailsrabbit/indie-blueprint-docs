@@ -16,6 +16,7 @@
 <br>
 <br>
 
+- [Other plugins 🎫](#other-plugins-)
 - [Create a new repository from template 📘](#create-a-new-repository-from-template-)
 - [Configuration ⚙️](#configuration-️)
   - [Default bus layout](#default-bus-layout)
@@ -73,7 +74,7 @@
     - [Gamepad names and buttons](#gamepad-names-and-buttons)
     - [Current controller information](#current-controller-information)
     - [Methods](#methods-1)
-  - [Global day \& night clock](#global-day--night-clock)
+  - [Global day \& night clock ⌚](#global-day--night-clock-)
     - [Signals](#signals-3)
     - [Configurable parameters](#configurable-parameters)
     - [Information](#information)
@@ -120,6 +121,16 @@
   - [Camera2D](#camera2d)
   - [Camera3D](#camera3d)
   - [Texture](#texture)
+
+# Other plugins 🎫
+
+- 💎 Create Match3 games with [Match3 Board](https://github.com/ninetailsrabbit/match3-board)
+- ⛰️ Generate procedural terrain with [Terrainy](https://github.com/ninetailsrabbit/Terrainy)
+- 🔘 Finite state machine with [FSM](https://github.com/ninetailsrabbit/node-finite-state-machine)
+- 🎲 Generate loot in your game with [Lootie](https://github.com/ninetailsrabbit/Lootie)
+- 🏠 Easily design and build basic 3D spaces with [Room creator](https://github.com/ninetailsrabbit/room-creator)
+
+---
 
 # Create a new repository from template 📘
 
@@ -1082,7 +1093,7 @@ func current_controller_is_switch_joycon_right() -> bool
 func current_controller_is_switch_joycon_left() -> bool
 ```
 
-## Global day & night clock
+## Global day & night clock ⌚
 
 This autoload scene located in `res://autoload/general/global_day_night_clock.tscn` can be used to have a global clock in your game. Manipulate the day, hour, minutes and access this information globally.
 
