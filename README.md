@@ -16,27 +16,29 @@
 <br>
 <br>
 
-- [Create a new repository from template](#create-a-new-repository-from-template)
-- [Configuration](#configuration)
+- [Create a new repository from template 📘](#create-a-new-repository-from-template-)
+- [Configuration ⚙️](#configuration-️)
+  - [Default bus layout](#default-bus-layout)
+  - [Input map](#input-map)
   - [Physics layers 2D \& 3D](#physics-layers-2d--3d)
-- [Autoloads](#autoloads)
-  - [GameGlobals](#gameglobals)
+- [Autoloads 🔽](#autoloads-)
+  - [GameGlobals 🗳️](#gameglobals-️)
     - [Delay func](#delay-func)
     - [Wait](#wait)
-  - [GlobalGameEvents](#globalgameevents)
-  - [WindowManager](#windowmanager)
+  - [GlobalGameEvents 🌐](#globalgameevents-)
+  - [WindowManager 🖥️](#windowmanager-️)
     - [Resolutions](#resolutions)
     - [Screen](#screen)
     - [Screenshots](#screenshots)
     - [Parallax](#parallax)
-  - [Audio](#audio)
+  - [Audio 🔊](#audio-)
     - [AudioManager](#audiomanager)
       - [Automatic unmute \& mute buses on application focus in \& out](#automatic-unmute--mute-buses-on-application-focus-in--out)
       - [Bus](#bus)
       - [Default audio volumes](#default-audio-volumes)
       - [Handling volume](#handling-volume)
       - [Audio effects](#audio-effects)
-    - [MusicManager](#musicmanager)
+    - [MusicManager 📻](#musicmanager-)
       - [MusicTrack](#musictrack)
       - [MusicPlaylist](#musicplaylist)
       - [Signals](#signals)
@@ -44,53 +46,57 @@
       - [Play modes](#play-modes)
       - [Playlists](#playlists)
     - [SoundPool](#soundpool)
-  - [ObjectPool](#objectpool)
+  - [ObjectPool 🫧](#objectpool-)
     - [ObjectPoolManager](#objectpoolmanager)
       - [Signals](#signals-1)
       - [Methods](#methods)
-    - [ObjectPool](#objectpool-1)
+    - [ObjectPool](#objectpool)
       - [ObjectPoolWrapper](#objectpoolwrapper)
       - [How to use](#how-to-use)
         - [Editor](#editor)
         - [GDScript](#gdscript)
         - [Spawn](#spawn)
         - [Kill](#kill)
-- [Utilities](#utilities)
-  - [Collisions](#collisions)
-  - [Color](#color)
+  - [Global Camera Shifter 🎥](#global-camera-shifter-)
+    - [Signals](#signals-2)
+    - [How to use](#how-to-use-1)
+    - [Transition steps](#transition-steps)
+- [Utilities 🧰](#utilities-)
+  - [Collisions 💥](#collisions-)
+  - [Color 🎨](#color-)
     - [ColorGradient](#colorgradient)
     - [ColorPalette](#colorpalette)
-  - [File handling](#file-handling)
+  - [Files 🗃️](#files-️)
     - [Load CSV](#load-csv)
-  - [Geometry](#geometry)
-  - [Hardware detector](#hardware-detector)
+  - [Geometry 🔳](#geometry-)
+  - [Hardware detector 💻](#hardware-detector-)
     - [Device/OS detection](#deviceos-detection)
     - [Exports](#exports)
     - [Auto-Discover quality preset](#auto-discover-quality-preset)
-  - [Input](#input)
+  - [Input 🎮](#input-)
     - [InputHelper](#inputhelper)
     - [InputControls](#inputcontrols)
-    - [MotionInput](#motioninput)
+    - [MotionInput ↔️](#motioninput-️)
       - [Example of use](#example-of-use)
-  - [Math](#math)
+  - [Math 🧮](#math-)
     - [Constants](#constants)
     - [Methods](#methods-1)
-    - [BitStream](#bitstream)
-  - [VelocityHelper](#velocityhelper)
-  - [Network](#network)
-  - [Nodes](#nodes)
+    - [BitStream 💠](#bitstream-)
+  - [VelocityHelper 👟](#velocityhelper-)
+  - [Network 📶](#network-)
+  - [Nodes ⭕](#nodes-)
     - [Node Positioner](#node-positioner)
     - [Node Traversal](#node-traversal)
     - [Node Remover](#node-remover)
-  - [Data structures](#data-structures)
+  - [Data structures 🛠️](#data-structures-️)
     - [Array](#array)
     - [Dictionary](#dictionary)
     - [Enum](#enum)
-    - [Vector](#vector)
+    - [Vector ➖](#vector-)
     - [Semantic version (Semver)](#semantic-version-semver)
   - [UUID 🔑](#uuid-)
-  - [Label](#label)
-  - [String](#string)
+  - [Label 🏷️](#label-️)
+  - [String 🔤](#string-)
     - [Constants](#constants-1)
     - [Methods](#methods-2)
   - [Time](#time)
@@ -98,7 +104,7 @@
   - [Camera3D](#camera3d)
   - [Texture](#texture)
 
-# Create a new repository from template
+# Create a new repository from template 📘
 
 Go to the [template](https://github.com/ninetailsrabbit/indie-blueprint) and create a new repository from it
 
@@ -106,11 +112,11 @@ Go to the [template](https://github.com/ninetailsrabbit/indie-blueprint) and cre
 
 ---
 
-# Configuration
+# Configuration ⚙️
 
 This template starts with some initial configurations that you need to know to get the most out of it.
 
-// Default bus layout
+## Default bus layout
 
 There is a default bus layout to use in your project that are sufficient for any small-medium indie game, you can extend it or modify based on your use case but here's a good place to start
 
@@ -123,7 +129,7 @@ There is a default bus layout to use in your project that are sufficient for any
 - `UI`: User interface sounds, button clicks, hover, transition animations, etc.
 - `Ambient`: Ambient sounds like wind, nature, ocean, house interior and other stuff
 
-// Input map
+## Input map
 
 This project comes with very simple predefined input maps to avoid interfering with your game in a tedious way. You can use the `MotionInput` helper class to use it even more easily
 
@@ -147,19 +153,16 @@ This project comes with very simple predefined input maps to avoid interfering w
 - `Layer 9`: It's named **Playing cards**
 - `Layer 10`: It's named **Ladders**
 
-# Autoloads
+# Autoloads 🔽
 
 A bunch of autoloads are ready to use for common operation in videogames to manage audio, global variables, signals, gamepad support, persistence, etc.
 
-## GameGlobals
+## GameGlobals 🗳️
 
-This singletons works to share data across nodes, they are always on the scene tree and can be accesed anywhere.
-
-`GameGlobals` contains the pre-configured physic layer values and is intended to implement here the variables or functions that need to be accessed globally in your game.
+This singletons works to share data across nodes, they are always on the scene tree and can be accesed anywhere. This is the place where you can create functions and variables that need to be accessed globally.
 
 ```swift
 extends Node
-
 
 const world_collision_layer: int = 1
 const player_collision_layer: int = 2
@@ -173,22 +176,10 @@ const playing_cards_collision_layer: int = 256
 const ladders_collision_layer: int = 512
 
 
-// Example with lambda -> GameGlobals.delay_func(func(): print("test"), 1.5)
-// Example with arguments -> GameGlobals.delay_func(print_text.bind("test"), 2.0)
-func delay_func(callable: Callable, time: float, deferred: bool = true):
-	if callable.is_valid():
-		await wait(time)
+func delay_func(callable: Callable, time: float, deferred: bool = true)
 
-		if deferred:
-			callable.call_deferred()
-		else:
-			callable.call()
+func wait(seconds: float = 1.0)
 
-// Example of use: await GameGlobals.wait(1.5)
-func wait(seconds: float = 1.0):
-	return get_tree().create_timer(seconds).timeout
-
-#endregion
 ```
 
 ### Delay func
@@ -211,11 +202,11 @@ You can create a time delay in any line of code, just use the function wait like
 `GameGlobals.wait(2.5) // Waits 2.5 seconds before continue the execution
 ```
 
-## GlobalGameEvents
+## GlobalGameEvents 🌐
 
 `GlobalGameEvents` contains all the global signals by which any node or script can connect. It contains few basic ones and this is where you should place those events that you want multiple nodes to listen to.
 
-## WindowManager
+## WindowManager 🖥️
 
 One of the most important and allows you to have control of the game windows as well as resolution information, take screenshots and much more.
 
@@ -311,29 +302,29 @@ var resolutions: Dictionary = {
 
 ```swift
 //Center the window position based on the monitor screen _(not the viewport)_. This is called automatically when the size_changed signal is emitted so there is no reason to use it individually.
-center_window_position(viewport: Viewport = get_viewport()) -> void
+func center_window_position(viewport: Viewport = get_viewport()) -> void
 
 // Get the center of the viewport screen in the world
-screen_center() -> Vector2i
+func screen_center() -> Vector2i
 
 //Center of the current PC screen monitor
-monitor_screen_center() -> Vector2i
+func monitor_screen_center() -> Vector2i
 
 // Get the frame rect where the current active Camera2D is on the screen, useful to see which elements are inside the camera and can be visible.
-get_camera2d_frame(viewport: Viewport = get_viewport()) -> Rect2
+func get_camera2d_frame(viewport: Viewport = get_viewport()) -> Rect2
 ```
 
 ### Screenshots
 
 ```swift
 // Take a screenshot of the current viewport and return it as an [Image](https://docs.godotengine.org/en/stable/classes/class_image.html) class
-screenshot(viewport: Viewport) -> Image
+func screenshot(viewport: Viewport) -> Image
 
 // Take a screenshot of the current viewport and insert it as a texture into a [TextureRect](https://docs.godotengine.org/en/stable/classes/class_texturerect.html) node
-screenshot_to_texture_rect(viewport: Viewport, texture_rect: TextureRect = TextureRect.new()) -> TextureRect
+func screenshot_to_texture_rect(viewport: Viewport, texture_rect: TextureRect = TextureRect.new()) -> TextureRect
 
 // Take a screenshot of the current viewport and save it as a `.png` into the folder path passed as parameter, by default uses `OS.get_user_data_dir()` which returns the path to the current user folder according to the operating system.
-screenshot_to_folder(folder: String = "%s/screenshots" % [OS.get_user_data_dir()], viewport: Viewport = get_viewport()) -> Error:
+func screenshot_to_folder(folder: String = "%s/screenshots" % [OS.get_user_data_dir()], viewport: Viewport = get_viewport()) -> Error:
 ```
 
 ### Parallax
@@ -342,17 +333,17 @@ These methods automatically adapt the appropriate parallax size according to the
 
 ```swift
 // Old Parallax node
-adapt_parallax_background_to_horizontal_viewport(parallax_background: ParallaxBackground, viewport: Rect2 = get_window().get_visible_rect()) -> void
+func adapt_parallax_background_to_horizontal_viewport(parallax_background: ParallaxBackground, viewport: Rect2 = get_window().get_visible_rect()) -> void
 
-adapt_parallax_background_to_vertical_viewport(parallax_background: ParallaxBackground, viewport: Rect2 = get_window().get_visible_rect()) -> void
+func adapt_parallax_background_to_vertical_viewport(parallax_background: ParallaxBackground, viewport: Rect2 = get_window().get_visible_rect()) -> void
 
 // New Parallax node
-adapt_parallax_to_horizontal_viewport(parallax: Parallax2D, viewport: Rect2 = get_window().get_visible_rect()) -> void
+func adapt_parallax_to_horizontal_viewport(parallax: Parallax2D, viewport: Rect2 = get_window().get_visible_rect()) -> void
 
-adapt_parallax_to_vertical_viewport(parallax: Parallax2D, viewport: Rect2 = get_window().get_visible_rect()) -> void
+func adapt_parallax_to_vertical_viewport(parallax: Parallax2D, viewport: Rect2 = get_window().get_visible_rect()) -> void
 ```
 
-## Audio
+## Audio 🔊
 
 This autoloads are intended to manage all audio related things in your game, changing volume, playlist, crossfade between streams, sound pool and much more.
 
@@ -376,7 +367,7 @@ func _notification(what):
 
 #### Bus
 
-```csharp
+```swift
 // Available constants
 const MasterBusIndex = 0
 
@@ -389,19 +380,19 @@ const UIBus: StringName = &"UI"
 const AmbientBus: StringName = &"Ambient"
 
 // Available get methods that returns the bus index
-master_bus() -> int
+func master_bus() -> int
 
-music_bus() -> int
+func music_bus() -> int
 
-sfx_bus() -> int
+func sfx_bus() -> int
 
-echosfx_bus() -> int
+func echosfx_bus() -> int
 
-voice_bus() -> int
+func voice_bus() -> int
 
-ui_bus() -> int
+func ui_bus() -> int
 
-ambient_bus() -> int
+func ambient_bus() -> int
 ```
 
 #### Default audio volumes
@@ -419,61 +410,61 @@ static var default_audio_volumes: Dictionary = {
 	AmbientBus.to_lower(): 0.9
 }
 
+// Reset current bus volumes to default
+func reset_to_default_volumes() -> void
+
+
 // In addition, you can access the default bus volume value with the following method
 AudioManager.get_default_volume_for_bus(bus) // Where bus can be received as int or String.
-
-// Reset current bus volumes to default
-reset_to_default_volumes() -> void
-
 ```
 
 #### Handling volume
 
 The `AudioManager` provides few methods to operate with volume in an easy way. The bus parameter can be passed as the integer index or String
 
-```csharp
+```swift
 
-get_default_volume_for_bus(bus) -> float:
+func get_default_volume_for_bus(bus) -> float:
 
 // Change the volume of selected bus_index if it exists
-change_volume(bus, volume_value: float) -> void
+func change_volume(bus, volume_value: float) -> void
 
-get_actual_volume_db_from_bus(bus) -> float
+func get_actual_volume_db_from_bus(bus) -> float
 
-get_actual_volume_db_from_bus_name(bus_name: String) -> float
+func get_actual_volume_db_from_bus_name(bus_name: String) -> float
 
-get_actual_volume_db_from_bus_index(bus_index: int) -> float
+func get_actual_volume_db_from_bus_index(bus_index: int) -> float
 
-all_buses_are_muted() -> bool
+func all_buses_are_muted() -> bool
 
-is_muted(bus = MasterBusIndex) -> bool
+func is_muted(bus = MasterBusIndex) -> bool
 
-mute_bus(bus, mute_flag: bool = true) -> void
+func mute_bus(bus, mute_flag: bool = true) -> void
 
-mute_all_buses() -> void
+func mute_all_buses() -> void
 
-unmute_all_buses() -> void
+func unmute_all_buses() -> void
 ```
 
 #### Audio effects
 
 The buses have some effect filters already set up. To activate them you can use the following methods:
 
-```csharp
-apply_master_bus_low_pass_filter() -> void
+```swift
+func apply_master_bus_low_pass_filter() -> void
 
-remove_master_bus_low_pass_filter() -> void
+func remove_master_bus_low_pass_filter() -> void
 
-apply_master_bus_chorus_filter() -> void
+func apply_master_bus_chorus_filter() -> void
 
-remove_master_bus_chorus_filter() -> void
+func remove_master_bus_chorus_filter() -> void
 
-apply_master_bus_phaser_filter() -> void
+func apply_master_bus_phaser_filter() -> void
 
-remove_master_bus_phaser_filter() -> void
+func remove_master_bus_phaser_filter() -> void
 ```
 
-### MusicManager
+### MusicManager 📻
 
 The `MusicManager` autoload provides methods to play music that is persistent between scenes in your game. It has support for playlist and crossfade between streams.
 
@@ -534,33 +525,33 @@ A music bank is an array of music tracks available in your music manager. If the
 var music_bank: Array[MusicTrack] = []
 
 // Available methods to manipulate tracks
-add_music_tracks_to_bank(tracks: Array[MusicTrack])
+func add_music_tracks_to_bank(tracks: Array[MusicTrack])
 
-add_music_track_to_bank(track: MusicTrack)
+func add_music_track_to_bank(track: MusicTrack)
 
-remove_track_from_bank(track: MusicTrack)
+func remove_track_from_bank(track: MusicTrack)
 
-remove_tracks_from_bank(tracks: Array[MusicTrack])
+func remove_tracks_from_bank(tracks: Array[MusicTrack])
 
 
-pause_current_track() -> void
+func pause_current_track() -> void
 
-replay_current_track() -> void
+func replay_current_track() -> void
 
-play_music_from_bank(track, crossfade: bool = true, crossfade_time: float = default_crossfade_time)
+func play_music_from_bank(track, crossfade: bool = true, crossfade_time: float = default_crossfade_time)
 
-pick_random_track_from_bank(except: Array[MusicTrack]= []) -> MusicTrack
+func pick_random_track_from_bank(except: Array[MusicTrack]= []) -> MusicTrack
 
-get_music_from_bank(track_name: StringName) -> MusicTrack
+func get_music_from_bank(track_name: StringName) -> MusicTrack
 
 // Syntactic sugar to play a music track, it calls play_music_from_bank behind the scenes
-change_track_to(new_stream_name: String, crossfade: bool = true, crossfade_time: float = default_crossfade_time) -> void
+func change_track_to(new_stream_name: String, crossfade: bool = true, crossfade_time: float = default_crossfade_time) -> void
 
-change_track(new_stream_name: String, crossfade: bool = true, crossfade_time: float = default_crossfade_time) -> void
+func change_track(new_stream_name: String, crossfade: bool = true, crossfade_time: float = default_crossfade_time) -> void
 
-change_music(new_stream_name: String, crossfade: bool = true, crossfade_time: float = default_crossfade_time) -> void
+func change_music(new_stream_name: String, crossfade: bool = true, crossfade_time: float = default_crossfade_time) -> void
 
-change_music_to(new_stream_name: String, crossfade: bool = true, crossfade_time: float = default_crossfade_time) -> void
+func change_music_to(new_stream_name: String, crossfade: bool = true, crossfade_time: float = default_crossfade_time) -> void
 ```
 
 #### Play modes
@@ -575,20 +566,20 @@ enum PlayMode {
 }
 
 // Update
-change_mode_to_manual() -> void
+func change_mode_to_manual() -> void
 
-change_mode_to_random_music_from_bank() -> void
+func change_mode_to_random_music_from_bank() -> void
 
-change_mode_to_playlist() -> void
+func change_mode_to_playlist() -> void
 
-change_mode(new_play_mode: PlayMode) -> void
+func change_mode(new_play_mode: PlayMode) -> void
 
 // Get
-is_manual_mode() -> bool
+func is_manual_mode() -> bool
 
-is_random_music_mode() -> bool
+func is_random_music_mode() -> bool
 
-is_playlist_mode() -> bool
+func is_playlist_mode() -> bool
 ```
 
 #### Playlists
@@ -601,15 +592,15 @@ This manager allows you to create multiple playlists and select them in a very e
 var music_playlists: Dictionary = {}
 
 
-start_playlist(playlist, from_track: int = 0, crossfade: bool = true, crossfade_time: float = default_crossfade_time) -> void
+func start_playlist(playlist, from_track: int = 0, crossfade: bool = true, crossfade_time: float = default_crossfade_time) -> void
 
-add_playlist(playlist: MusicPlaylist) -> void
+func add_playlist(playlist: MusicPlaylist) -> void
 
-remove_playlist(playlist) -> void
+func remove_playlist(playlist) -> void
 
-play_next_in_playlist(playlist: MusicPlaylist = current_playlist) -> void
+func play_next_in_playlist(playlist: MusicPlaylist = current_playlist) -> void
 
-next_in_playlist(playlist: MusicPlaylist = current_playlist) -> MusicTrack
+func next_in_playlist(playlist: MusicPlaylist = current_playlist) -> MusicTrack
 ```
 
 ### SoundPool
@@ -619,39 +610,38 @@ The `SoundPool` autoload provides globally available pool of `AudioStreamPlayer`
 By default it creates **32** `AudioStreamPlayer` nodes.
 
 ```swift
-increase_pool(pool_number: int, override: bool = false)
+func increase_pool(pool_number: int, override: bool = false)
 
-decrease_pool(pool_number: int)
-
-
-play(stream: AudioStream, volume: float = 1.0, bus: String = AudioManager.SFXBus)
-
-play_with_pitch(stream: AudioStream, volume: float = 1.0, pitch_scale: float = 1.0, bus: String = AudioManager.SFXBus)
-
-play_with_pitch_range(stream: AudioStream, volume: float = 1.0, min_pitch_scale: float = 0.9, max_pitch_scale: float = 1.3, bus: String = AudioManager.SFXBus)
-
-play_random_stream(streams: Array[AudioStream] = [], volume: float = 1.0, bus: String = AudioManager.SFXBus)
-
-play_random_stream_with_pitch(streams: Array[AudioStream] = [], volume: float = 1.0, pitch_scale: float = 1.0, bus: String = AudioManager.SFXBus)
-
-play_random_stream_with_pitch_range(streams: Array[AudioStream] = [], volume: float = 1.0, min_pitch_scale: float = 0.9, max_pitch_scale: float = 1.3,  bus: String = AudioManager.SFXBus)
+func decrease_pool(pool_number: int)
 
 
-stop_streams_from_bus(bus: String = AudioManager.SFXBus)
+func play(stream: AudioStream, volume: float = 1.0, bus: String = AudioManager.SFXBus)
 
-stop_streams_from_buses(buses: Array[String] = [AudioManager.SFXBus])
+func play_with_pitch(stream: AudioStream, volume: float = 1.0, pitch_scale: float = 1.0, bus: String = AudioManager.SFXBus)
 
-pause_streams_from_bus(bus: String = AudioManager.SFXBus)
+func play_with_pitch_range(stream: AudioStream, volume: float = 1.0, min_pitch_scale: float = 0.9, max_pitch_scale: float = 1.3, bus: String = AudioManager.SFXBus)
 
-pause_streams_from_buses(buses: Array[String] = [AudioManager.SFXBus])
+func play_random_stream(streams: Array[AudioStream] = [], volume: float = 1.0, bus: String = AudioManager.SFXBus)
 
-unpause_streams_from_bus(bus: String = AudioManager.SFXBus)
+func play_random_stream_with_pitch(streams: Array[AudioStream] = [], volume: float = 1.0, pitch_scale: float = 1.0, bus: String = AudioManager.SFXBus)
 
-unpause_streams_from_buses(buses: Array[String] = [AudioManager.SFXBus])
+func play_random_stream_with_pitch_range(streams: Array[AudioStream] = [], volume: float = 1.0, min_pitch_scale: float = 0.9, max_pitch_scale: float = 1.3,  bus: String = AudioManager.SFXBus)
 
+
+func stop_streams_from_bus(bus: String = AudioManager.SFXBus)
+
+func stop_streams_from_buses(buses: Array[String] = [AudioManager.SFXBus])
+
+func pause_streams_from_bus(bus: String = AudioManager.SFXBus)
+
+func pause_streams_from_buses(buses: Array[String] = [AudioManager.SFXBus])
+
+func unpause_streams_from_bus(bus: String = AudioManager.SFXBus)
+
+func unpause_streams_from_buses(buses: Array[String] = [AudioManager.SFXBus])
 ```
 
-## ObjectPool
+## ObjectPool 🫧
 
 The object pool pattern is a software creational design pattern that uses a set of initialized objects kept ready to use – a "pool" – rather than allocating and destroying them on demand.
 
@@ -812,14 +802,107 @@ free_pool() -> void
 
 //You can free the object from itself
 my_spawned_object.queue_free()
-
 ```
 
-# Utilities
+## Global Camera Shifter 🎥
+
+This system allows you to smoothly transition between cameras in your game using the `GlobalCameraShifter` class. To enable this functionality, you'll need to autoload the `autoload/camera/global_camera_transition.tscn`. This scene creates two cameras internally for transition purposes.
+
+**Concept:**
+The system utilizes a third, global camera to facilitate the transition between two other cameras. This temporary camera mimics the properties of the camera you want to transition to. Once the transition completes, the target camera becomes the active camera in your scene.
+
+**Benefits**:
+
+- **Record Transitions:** Easily record transition sequences between cameras for smooth playback.
+- **Manage Duration:** Control the duration of the transition for a polished effect.
+
+**_Important note_**
+If a camera transition is already in progress, attempting to trigger another transition of the same type _(2D or 3D)_ will not interrupt the ongoing one. Wait for the current transition to finish before initiating a new one.
+
+This system can handle simultaneous transitions between cameras, but with a limitation: only one transition can be active at a time for each camera type _(2D or 3D)_.
+
+In simpler terms, you can't have multiple transitions happening for the same type of camera _(2D or 3D)_ at once. However, you can transition between two 3D cameras while also transitioning between two separate 2D cameras in a Subviewport.
+
+### Signals
+
+```swift
+transition_2d_started(from: Camera2D, to: Camera2D, duration: float)
+transition_2d_finished(from: Camera2D, to: Camera2D, duration: float)
+transition_3d_started(from: Camera3D, to: Camera3D, duration: float)
+transition_3d_finished(from: Camera3D, to: Camera3D, duration: float)
+```
+
+### How to use
+
+First of all you can configure few parameters on this autoload scene
+
+![global_camera_parameters](images/global_camera.png)
+
+- **Default transition duration:** The default duration to transition between cameras
+- **Remove last transition step 2D/3D on back:** In a list of cameras to transition, going backwards, you can decide whether or not to remove the last one from this list in order not to transition back to it.
+
+To transition to a target camera you can use this methods depending on whether it is 2D or 3D
+
+```swift
+transition_to_requested_camera_2d(from: Camera2D, to: Camera2D, duration: float = default_transition_duration, record_transition: bool = true)
+
+transition_to_requested_camera_3d(from: Camera3D, to: Camera3D, duration: float = default_transition_duration, record_transition: bool = true)
+```
+
+### Transition steps
+
+When a transition is recorded _(`record_transition == true`)_ it will create a class `TransitionStep2D` or `TransitionStep3D` depending on the transition requested.
+
+```swift
+class TransitionStep2D:
+	var from: Camera2D
+	var to: Camera2D
+	var duration: float
+
+	func _init(_from: Camera2D, _to: Camera2D, _duration: float)
+
+class TransitionStep3D:
+	var from: Camera3D
+	var to: Camera3D
+	var duration: float
+
+	func _init(_from: Camera3D, _to: Camera3D, _duration: float)
+```
+
+```csharp
+// You can access the current recorded transitions through the variables:
+var transition_steps_2d: Array[TransitionStep2D] = []
+var transition_steps_3d: Array[TransitionStep3D] = []
+
+//Transition to the provided camera from the last step recorded on transition_steps_2d. If there are no recorded steps, no transition occurs.
+transition_to_next_camera_2d(to: Camera2D, duration: float = transition_duration)
+
+// Similar to the 2D version, but applies to 3D camera transitions.
+transition_to_next_camera_3d(to: Camera3D, duration: float = transition_duration)
+
+// Transition to a previous camera from the last one in transition_step_2d. If delete_step is true, this last recorded transition will be deleted from the variable transition_step_2d
+transition_to_previous_camera_2d(delete_step: bool = remove_last_transition_step_2d_on_back)
+
+// Similar to the 2D version, but applies to 3D camera transitions.
+transition_to_previous_camera_3d(delete_step: bool = remove_last_transition_step_3d_on_back)
+
+// Transition to the first camera recorded on transition_step_2d. If clean_steps_on_finished is true, the recorded transitions will be deleted after the operation ends.
+transition_to_first_camera_via_all_steps_2d(clean_steps_on_finished: bool = false)
+
+// Similar to the 2D version, but applies to 3D camera transitions.
+transition_to_first_camera_via_all_steps_3d(clean_steps_on_finished: bool = false)
+
+
+is_transitioning_2d() -> bool
+
+is_transitioning_3d() -> bool
+```
+
+# Utilities 🧰
 
 General utilities that does not belongs to a particular place and are sed as static classes that can be accessed at any time even if they are not in the scene tree.
 
-## Collisions
+## Collisions 💥
 
 The `CollisionHelper` class provide methods for working with collisions, here you can translate `layer->value` and `value->layer` in a fast way.
 
@@ -838,7 +921,7 @@ CollisionHelper.value_to_layer(1024) // Returns 11
 
 ```
 
-## Color
+## Color 🎨
 
 The `ColorHelper` class provides an easy way to work with colors. Create gradients and palettes through resources, generate random colors, compare them, etc.
 
@@ -930,7 +1013,7 @@ This template provides you a set of palettes located in `res://utilities/color/p
 
 **_The colors templates provided are the same as the gradients but it uses a `PackedColorArray` instead of `GradientTexture1D`._**
 
-## File handling
+## Files 🗃️
 
 The `FileHelper` class provides static methods to work with file extensions mainly parsing or retrieving metadata.
 
@@ -1013,7 +1096,7 @@ for line in FileHelper.load_csv("res://currency.csv"):
 ]
 ```
 
-## Geometry
+## Geometry 🔳
 
 Functions to obtain information on sizes, measurements or to draw specific shapes
 
@@ -1059,7 +1142,7 @@ create_capsule_mesh(height: float = 2.0, radius: float = 0.5) -> MeshInstance3D
 
 ```
 
-## Hardware detector
+## Hardware detector 💻
 
 All the hardware information that we can obtain lives on this class, contains auto-detection of the video adapter to decide which would be the most suitable quality preset for the player as well as other functionalities.
 
@@ -1156,7 +1239,7 @@ class GraphicQualityDisplay:
 		available_text = _available_text
 ```
 
-## Input
+## Input 🎮
 
 ### InputHelper
 
@@ -1300,7 +1383,7 @@ const DashAction: StringName = &"dash"
 //...
 ```
 
-### MotionInput
+### MotionInput ↔️
 
 This class simplifies handling and transforming player input directions in your Godot games. It provides various properties and functions to access and manipulate input based on your needs.
 
@@ -1384,7 +1467,7 @@ func _physics_process(delta):
 
 ```
 
-## Math
+## Math 🧮
 
 The `MathHelper` class provide methods to work more easily with mathematical operations and oriented to videogames.
 
@@ -1562,7 +1645,7 @@ logb(x: float, base: float = 10.0) -> float
 generate_random_seed(seed_range: int = 10) -> String
 ```
 
-### BitStream
+### BitStream 💠
 
 The BitStream class offers a powerful tool for working with data in a bit-oriented manner. It allows you to efficiently pack and unpack integer values and strings into a compact format, saving memory and potentially improving performance compared to traditional string storage.
 
@@ -1656,7 +1739,7 @@ func _on_server_data_received(data):
 
 ```
 
-## VelocityHelper
+## VelocityHelper 👟
 
 The `VelocityHelper` class helps to work with units of measurement related to velocity
 
@@ -1679,7 +1762,7 @@ current_speed_on_kilometers_per_hour(velocity) -> float:
 
 ```
 
-## Network
+## Network 📶
 
 The `NetworkHelper` class provide functions that have to do with network operations
 
@@ -1693,7 +1776,7 @@ open_external_link(url: String) -> void
 
 ```
 
-## Nodes
+## Nodes ⭕
 
 This node helpers are static classes in Godot that acts as your toolbox for simplifying common node operations. It provides convenient methods to handle tasks you'd typically perform using native methods like direction_to and distance_to. However, offers a more user-friendly approach: instead of working directly with vectors, you can interact with nodes themselves.
 
@@ -1814,7 +1897,7 @@ free_children(node: Node, except: Array = []) -> void:
 
 ```
 
-## Data structures
+## Data structures 🛠️
 
 This classes help to handle known data structures and simplify many operations by abstracting their logic and exposing them as a single function
 
@@ -1890,7 +1973,7 @@ The `ArrayHelper` class provides useful functions to work with Enums.
 func random_value_from(_enum) -> Variant
 ```
 
-### Vector
+### Vector ➖
 
 The `VectorHelper` class provides a collection of commonly used vector methods that can simplify your everyday game development tasks. While it offers a wide range of functions, in-depth documentation might not be available for every method. However, the method names themselves are designed to be clear and descriptive.
 
@@ -2137,7 +2220,7 @@ is_equal(other)
 
 To generate a new `UUID` just use `UUID.v4()` or if you want to provide a custom `RandomNumberGenerator` use `UUID.v4_rng(RandomNumberGenerator.new())`
 
-## Label
+## Label 🏷️
 
 The `LabelHelper` class provide methods to manipulate text using the `Label` node
 
@@ -2146,7 +2229,7 @@ The `LabelHelper` class provide methods to manipulate text using the `Label` nod
 func adjust_text(label: Label, max_size: int = 200) -> void
 ```
 
-## String
+## String 🔤
 
 The `StringHelper` class provides helpful functions for manipulating strings and text in general.
 
