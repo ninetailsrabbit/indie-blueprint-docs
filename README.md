@@ -81,7 +81,7 @@
   - [Math 🧮](#math-)
     - [Constants](#constants)
     - [Methods](#methods-1)
-    - [BitStream 💠](#bitstream-)
+  - [BitStream 💠](#bitstream-)
   - [VelocityHelper 👟](#velocityhelper-)
   - [Network 📶](#network-)
   - [Nodes ⭕](#nodes-)
@@ -656,9 +656,9 @@ The `ObjectPoolManager` autoload centralise all pools in your game to be accesse
 #### Signals
 
 ```swift
-added_pool(pool: ObjectPool)
-updated_pool(previous_pool: ObjectPool, current: ObjectPool)
-removed_pool(pool: ObjectPool)
+func added_pool(pool: ObjectPool)
+func updated_pool(previous_pool: ObjectPool, current: ObjectPool)
+func removed_pool(pool: ObjectPool)
 ```
 
 #### Methods
@@ -716,19 +716,11 @@ var instance: Node
 var sleeping: bool = true
 
 
-func _init(_pool: ObjectPool) -> void:
-	pool = _pool
-	instance = pool.scene.instantiate()
+func _init(_pool: ObjectPool) -> void
 
+func kill() -> void
 
-func kill() -> void:
-	pool.kill(self)
-
-
-func queue_free() -> void:
-	if is_instance_valid(self) and not pool.instance.is_queued_for_deletion():
-		pool.instance.queue_free()
-		free()
+func queue_free() -> void
 ```
 
 #### How to use
@@ -770,11 +762,11 @@ Note that it will always return a `ObjectPoolWrapper` and not the original insta
 Spawning is very simple:
 
 ```swift
-spawn() -> ObjectPoolWrapper:
+func spawn() -> ObjectPoolWrapper:
 
-spawn_multiple(amount: int) -> Array[ObjectPoolWrapper]
+func spawn_multiple(amount: int) -> Array[ObjectPoolWrapper]
 
-spawn_all() -> Array[ObjectPoolWrapper]:
+func spawn_all() -> Array[ObjectPoolWrapper]:
 ```
 
 ##### Kill
@@ -782,11 +774,11 @@ spawn_all() -> Array[ObjectPoolWrapper]:
 To delete instances the pool has a few methods available to it. Ideally, this method should be called directly from the `ObjectPoolWrapper`. If you want to remove it from memory and the pool use the `free()` methods
 
 ```swift
-kill(spawned_object: ObjectPoolWrapper) -> void
+func kill(spawned_object: ObjectPoolWrapper) -> void
 
-kill_multiple(spawned_objects: Array[ObjectPoolWrapper]) -> void
+func kill_multiple(spawned_objects: Array[ObjectPoolWrapper]) -> void
 
-kill_all() -> void
+func kill_all() -> void
 
 //You can kill the object from itself
 my_spawned_object.kill()
@@ -794,11 +786,11 @@ my_spawned_object.kill()
 // ---------------
 
 //Free the object forever
-free_object(spawned_object: ObjectPoolWrapper) -> void
+func free_object(spawned_object: ObjectPoolWrapper) -> void
 
-free_objects(spawned_objects: Array[ObjectPoolWrapper]) -> void
+func free_objects(spawned_objects: Array[ObjectPoolWrapper]) -> void
 
-free_pool() -> void
+func free_pool() -> void
 
 //You can free the object from itself
 my_spawned_object.queue_free()
@@ -844,9 +836,9 @@ First of all you can configure few parameters on this autoload scene
 To transition to a target camera you can use this methods depending on whether it is 2D or 3D
 
 ```swift
-transition_to_requested_camera_2d(from: Camera2D, to: Camera2D, duration: float = default_transition_duration, record_transition: bool = true)
+func transition_to_requested_camera_2d(from: Camera2D, to: Camera2D, duration: float = default_transition_duration, record_transition: bool = true)
 
-transition_to_requested_camera_3d(from: Camera3D, to: Camera3D, duration: float = default_transition_duration, record_transition: bool = true)
+func transition_to_requested_camera_3d(from: Camera3D, to: Camera3D, duration: float = default_transition_duration, record_transition: bool = true)
 ```
 
 ### Transition steps
@@ -869,28 +861,28 @@ class TransitionStep3D:
 	func _init(_from: Camera3D, _to: Camera3D, _duration: float)
 ```
 
-```csharp
+```swift
 // You can access the current recorded transitions through the variables:
 var transition_steps_2d: Array[TransitionStep2D] = []
 var transition_steps_3d: Array[TransitionStep3D] = []
 
 //Transition to the provided camera from the last step recorded on transition_steps_2d. If there are no recorded steps, no transition occurs.
-transition_to_next_camera_2d(to: Camera2D, duration: float = transition_duration)
+func transition_to_next_camera_2d(to: Camera2D, duration: float = transition_duration)
 
 // Similar to the 2D version, but applies to 3D camera transitions.
-transition_to_next_camera_3d(to: Camera3D, duration: float = transition_duration)
+func transition_to_next_camera_3d(to: Camera3D, duration: float = transition_duration)
 
 // Transition to a previous camera from the last one in transition_step_2d. If delete_step is true, this last recorded transition will be deleted from the variable transition_step_2d
-transition_to_previous_camera_2d(delete_step: bool = remove_last_transition_step_2d_on_back)
+func transition_to_previous_camera_2d(delete_step: bool = remove_last_transition_step_2d_on_back)
 
 // Similar to the 2D version, but applies to 3D camera transitions.
-transition_to_previous_camera_3d(delete_step: bool = remove_last_transition_step_3d_on_back)
+func transition_to_previous_camera_3d(delete_step: bool = remove_last_transition_step_3d_on_back)
 
 // Transition to the first camera recorded on transition_step_2d. If clean_steps_on_finished is true, the recorded transitions will be deleted after the operation ends.
-transition_to_first_camera_via_all_steps_2d(clean_steps_on_finished: bool = false)
+func transition_to_first_camera_via_all_steps_2d(clean_steps_on_finished: bool = false)
 
 // Similar to the 2D version, but applies to 3D camera transitions.
-transition_to_first_camera_via_all_steps_3d(clean_steps_on_finished: bool = false)
+func transition_to_first_camera_via_all_steps_3d(clean_steps_on_finished: bool = false)
 
 
 is_transitioning_2d() -> bool
@@ -907,9 +899,9 @@ General utilities that does not belongs to a particular place and are sed as sta
 The `CollisionHelper` class provide methods for working with collisions, here you can translate `layer->value` and `value->layer` in a fast way.
 
 ```swift
-layer_to_value(layer: int) -> int
+func layer_to_value(layer: int) -> int
 
-value_to_layer(value: int) -> int
+func value_to_layer(value: int) -> int
 
 // Examples
 
@@ -925,13 +917,14 @@ CollisionHelper.value_to_layer(1024) // Returns 11
 
 The `ColorHelper` class provides an easy way to work with colors. Create gradients and palettes through resources, generate random colors, compare them, etc.
 
-```csharp
+```swift
 const ColorPalettesPath: String = "res://utilities/color/palettes/"
 const GradientsPath: String = "res://utilities/color/gradients/"
 
 // By default it uses the path provided in this class to find recursively the palette & gradient with the selected id
-get_palette(id: StringName) -> ColorPalette
-get_gradient(id: StringName) -> ColorGradient
+func get_palettte(id: StringName) -> ColorPalette
+
+func get_gradient(id: StringName) -> ColorGradient
 
 // ---------------------
 
@@ -942,23 +935,21 @@ enum ColorGenerationMethod {
 }
 
 // Based on the method, it will call the generate_random_hsv_colors or generate_random_rgb_colors method
-generate_random_colors(method: ColorGenerationMethod, number_of_colors: int = 12, saturation: float = 0.5, value: float = 0.95) -> PackedColorArray
+func generate_random_colors(method: ColorGenerationMethod, number_of_colors: int = 12, saturation: float = 0.5, value: float = 0.95) -> PackedColorArray
 
 // Using ideas from https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
-generate_random_hsv_colors(number_of_colors: int = 12, saturation: float = 0.5, value: float = 0.95) -> PackedColorArray
+func generate_random_hsv_colors(number_of_colors: int = 12, saturation: float = 0.5, value: float = 0.95) -> PackedColorArray
 
 // Using ideas from https://www.iquilezles.org/www/articles/palettes/palettes.htm
-generate_random_rgb_colors(number_of_colors: int = 12, darkened_value: float = 0.2) -> PackedColorArray
+func generate_random_rgb_colors(number_of_colors: int = 12, darkened_value: float = 0.2) -> PackedColorArray
 
 // ---------------------
 
 // Compare colors with a tolerance
-colors_are_similar(color_a: Color, color_b: Color, tolerance: float = 100.0) -> bool
+func colors_are_similar(color_a: Color, color_b: Color, tolerance: float = 100.0) -> bool
 
 // Translates a Vector3 or Vector4 to a valid Color. Returns Color.WHITE by default
-color_from_vector(vec) -> Color:
-
-
+func color_from_vector(vec) -> Color:
 ```
 
 ### ColorGradient
@@ -1019,25 +1010,25 @@ The `FileHelper` class provides static methods to work with file extensions main
 
 ```swift
 // Validate a file path to see if it is valid and can be worked with.
-filepath_is_valid(path: String) -> bool
+func filepath_is_valid(path: String) -> bool
 
 // Validate a directory path to see if it is valid and can be worked with.
-dirpath_is_valid(path: String) -> bool
+func dirpath_is_valid(path: String) -> bool
 
 // Validate a directory path where the godot executable folder is.
-directory_exist_on_executable_path(directory_path: String) -> bool
+func directory_exist_on_executable_path(directory_path: String) -> bool
 
 // Get all the files recursively on the path provided, a RegEx can be passed to filter the files to retrieve.
-get_files_recursive(path: String, regex: RegEx = null) -> Array
+func get_files_recursive(path: String, regex: RegEx = null) -> Array
 
 // Copy content of a folder recursively into another overwrite existing files on the process
-copy_directory_recursive(from_dir: String, to_dir: String) -> Error
+func copy_directory_recursive(from_dir: String, to_dir: String) -> Error
 
 // Remove all the files recursively on the path provided, a RegEx can be passed to filter what files to delete.
-remove_files_recursive(path: String, regex: RegEx = null) -> Error
+func remove_files_recursive(path: String, regex: RegEx = null) -> Error
 
 // This is actually a shortcut to retrieve all the .pck files on a folder but uses get_files_recursive with a RegEx behind the scenes.
-get_pck_files(path: String) -> Array
+func get_pck_files(path: String) -> Array
 ```
 
 ### Load CSV
@@ -1102,44 +1093,42 @@ Functions to obtain information on sizes, measurements or to draw specific shape
 
 ```swift
 // Get a random position as `Vector3` on any mesh shape surface
-get_random_mesh_surface_position(target: MeshInstance3D) -> Vector3
+func get_random_mesh_surface_position(target: MeshInstance3D) -> Vector3
 
 // Get a random position as `Vector2` from the inside of a circle with the given `radius`
-random_inside_unit_circle(position: Vector2, radius: float = 1.0) -> Vector
+func random_inside_unit_circle(position: Vector2, radius: float = 1.0) -> Vector
 
 // Get a random position as `Vector2` from a circunference
-random_on_unit_circle(position: Vector2) -> Vector2
+func random_on_unit_circle(position: Vector2) -> Vector2
 
 // Get a random point as Vector2 in the provided Rect2
-random_point_in_rect(rect: Rect2) -> Vector2
+func random_point_in_rect(rect: Rect2) -> Vector2
 
 // Get a random point as Vector2 in annulus _(a donut shape)_ with provided center and radius provided
-random_point_in_annulus(center, radius_small, radius_large) -> Vector2
+func random_point_in_annulus(center, radius_small, radius_large) -> Vector2
 
 // Get the bounding box as `Rect2` from the polygon points provided
-polygon_bounding_box(polygon: PackedVector2Array) -> Rect2
+func polygon_bounding_box(polygon: PackedVector2Array) -> Rect2
 
+func is_valid_polygon(points: PackedVector2Array) -> bool
 
-is_valid_polygon(points: PackedVector2Array) -> bool
+func calculate_polygon_area(polygon: PackedVector2Array) -> float
 
-calculate_polygon_area(polygon: PackedVector2Array) -> float
-
-fracture_polygons_triangles(polygon: PackedVector2Array) -> Array
+func fracture_polygons_triangles(polygon: PackedVector2Array) -> Array
 
 
 // Shorcuts to create MeshInstance3D with a specific mesh shape
-create_plane_mesh(size: Vector2 = Vector2.ONE) -> MeshInstance3D
+func create_plane_mesh(size: Vector2 = Vector2.ONE) -> MeshInstance3D
 
-create_quad_mesh(size: Vector2 = Vector2.ONE) -> MeshInstance3D
+func create_quad_mesh(size: Vector2 = Vector2.ONE) -> MeshInstance3D
 
-create_prism_mesh(size: Vector3 = Vector3.ONE, left_to_right: float = 0.5) -> MeshInstance3D
+func create_prism_mesh(size: Vector3 = Vector3.ONE, left_to_right: float = 0.5) -> MeshInstance3D
 
-create_cilinder_mesh(height: float = 2.0, top_radius: float = 0.5, bottom_radius: float = 0.5) -> MeshInstance3D
+func create_cilinder_mesh(height: float = 2.0, top_radius: float = 0.5, bottom_radius: float = 0.5) -> MeshInstance3D
 
-create_sphere_mesh(height: float = 2.0, radius: float = 0.5, is_hemisphere: bool = false) -> MeshInstance3D
+func create_sphere_mesh(height: float = 2.0, radius: float = 0.5, is_hemisphere: bool = false) -> MeshInstance3D
 
-create_capsule_mesh(height: float = 2.0, radius: float = 0.5) -> MeshInstance3D
-
+func create_capsule_mesh(height: float = 2.0, radius: float = 0.5) -> MeshInstance3D
 ```
 
 ## Hardware detector 💻
@@ -1180,25 +1169,29 @@ Useful methods to detect the device on which the game is running and the operati
 
 ---
 
-`is_steam_deck() -> bool`
+```swift
+func is_steam_deck() -> bool
 
-`is_mobile() -> bool`
+func is_mobile() -> bool
 
-`is_windows() -> bool`
+func is_windows() -> bool
 
-`is_linux() -> bool`
+func is_linux() -> bool
 
-`is_mac() -> bool`
+func is_mac() -> bool
 
-`is_web() -> bool`
+func is_web() -> bool
+```
 
 ### Exports
 
 Information related to the game build
 
-`is_multithreading_enabled() -> bool`
+```swift
+func  is_multithreading_enabled() -> bool
 
-`is_exported_release() -> bool`
+func  is_exported_release() -> bool
+```
 
 ### Auto-Discover quality preset
 
@@ -1245,52 +1238,52 @@ class GraphicQualityDisplay:
 
 This section introduces the `InputHelper`, a collection of helpful functions for handling common input-related tasks in your game. It acts as a shortcut to avoid repetitive code for frequently used input checks.
 
-```csharp
+```swift
 // Detects one single left click
-is_mouse_left_click(event: InputEvent) -> bool
+func is_mouse_left_click(event: InputEvent) -> bool
 // Detects a constantly pressed left mouse button
-is_mouse_left_button_pressed(event: InputEvent) -> bool
+func is_mouse_left_button_pressed(event: InputEvent) -> bool
 
 // Detects one single right click
-is_mouse_right_click(event: InputEvent) -> bool
+func is_mouse_right_click(event: InputEvent) -> bool
 
 // Detects a constantly pressed right mouse button
-is_mouse_right_button_pressed(event: InputEvent) -> bool
+func is_mouse_right_button_pressed(event: InputEvent) -> bool
 
 // Quickly checks if the event is a mouse button
-is_mouse_button(event: InputEvent) -> bool
+func is_mouse_button(event: InputEvent) -> bool
 
 // In certain cases you want to translate the double clicks to single to ignore them. In this template is used
 // to remove the double clicks when input remapping
-double_click_to_single(event: InputEvent) -> InputEvent
+func double_click_to_single(event: InputEvent) -> InputEvent
 
 // Get the relative motion regardless of viewport resolution and scale. This is useful when getting mouse motion to move
 // the camera in a First Person Controller for example
-mouse_relative_motion(event: InputEvent, scene_tree: SceneTree) -> Vector2
+func mouse_relative_motion(event: InputEvent, scene_tree: SceneTree) -> Vector2
 
 // Return if the current mouse input mode is visible
-is_mouse_visible() -> bool
+func is_mouse_visible() -> bool
 
 // Return if the current mouse input mode is captured
-is_mouse_captured() -> bool
+func is_mouse_captured() -> bool
 
 // Change the current mouse mode to show the cursor
-show_mouse_cursor() -> void
+func show_mouse_cursor() -> void
 
 // Change the current mouse mode to confined
-show_mouse_cursor_confined() -> void
+func show_mouse_cursor_confined() -> void
 
 // Change the current mouse mode to captured
-capture_mouse() -> void
+func capture_mouse() -> void
 
 // Change the current mouse mode to hide
-hide_mouse_cursor() -> void
+func hide_mouse_cursor() -> void
 
 // Change the current mouse mode to hide confined
-hide_mouse_cursor_confined() -> void
+func hide_mouse_cursor_confined() -> void
 
 // Translates a raw InputEventKey into a human-readable string representation. This is useful for displaying what key was // pressed, including modifiers like "ctrl" or "shift" and physical key names.
-readable_key(key: InputEventKey)
+func readable_key(key: InputEventKey)
 
 // Basic example
 func _input(event: InputEvent):
@@ -1300,66 +1293,66 @@ func _input(event: InputEvent):
 
 
 // Determines if a numeric key (including numpad keys) was pressed in the InputEvent.
-numeric_key_pressed(event: InputEvent) -> bool
+func numeric_key_pressed(event: InputEvent) -> bool
 
-any_key_modifier_is_pressed() -> bool
+func any_key_modifier_is_pressed() -> bool
 
-shift_modifier_pressed() -> bool
+func shift_modifier_pressed() -> bool
 
-ctrl_modifier_pressed() -> bool
+func ctrl_modifier_pressed() -> bool
 
-alt_modifier_pressed() -> bool
+func alt_modifier_pressed() -> bool
 
 // Quickly checks if the event is a controller button (joypad button)
-is_controller_button(event: InputEvent) -> bool
+func is_controller_button(event: InputEvent) -> bool
 
 // Quickly checks if the event is a controller motion (joypad motion)
-is_controller_axis(event: InputEvent) -> bool
+func is_controller_axis(event: InputEvent) -> bool
 
 // Check if the current input comes from gamepad. It's a combination of is_controller_button and is_controller_axis
-is_gamepad_input(event: InputEvent) -> bool
+func is_gamepad_input(event: InputEvent) -> bool
 
 // This function checks if the action exists in the InputMap and is just pressed. The static class Input is used directly so this function only needs the input action name
-action_just_pressed_and_exists(action: String) -> bool
+func action_just_pressed_and_exists(action: String) -> bool
 
 // This function checks if the action exists in the InputMap and is pressed. This one can receive an InputEvent as it's being used the event.is_action_pressed
-action_pressed_and_exists(action: String, event: InputEvent = null) -> bool
+func action_pressed_and_exists(action: String, event: InputEvent = null) -> bool
 
 // Check if the action has been released and exists
-action_just_released_and_exists(action: String) -> bool
+func action_just_released_and_exists(action: String) -> bool
 
 // Check if the action has released and exists. This one needs to receive an InputEvent
-action_released_and_exists(event: InputEvent, action: String) -> bool
+func action_released_and_exists(event: InputEvent, action: String) -> bool
 
 // This powerful function checks if any of the actions listed in the provided actions array were just pressed in the InputEvent. This can simplify handling multiple key or button presses simultaneously.
-is_any_action_just_pressed(actions: Array, event: InputEvent = null):
+func is_any_action_just_pressed(actions: Array, event: InputEvent = null):
 
-// Similar to is_any_action_just_pressed, but checks if any of the actions in the array are currently being held down (pressed).
-is_any_action_pressed(actions: Array, event:InputEvent = null):
+// Similar to func is_any_action_just_pressed, but checks if any of the actions in the array are currently being held down (pressed).
+func is_any_action_pressed(actions: Array, event:InputEvent = null):
 
 // This function checks if any of the actions in the actions array were just released in the InputEvent. This can be useful for detecting when a player lets go of a key or button.
-is_any_action_just_released(actions: Array, event: InputEvent = null)
+func is_any_action_just_released(actions: Array, event: InputEvent = null)
 
 // This function checks if any of the actions in the actions array were released in the InputEvent. This can be useful for detecting when a player lets go of a key or button.
-is_any_action_released(actions: Array, event: InputEvent)
+func is_any_action_released(actions: Array, event: InputEvent)
 
 // Releases held input actions. This is useful for situations where you want to interrupt a continuously held input, such as canceling a cinematic trigger, ending a time stop effect, or breaking a player stun.
-release_input_actions(actions: Array[StringName] = [])
+func release_input_actions(actions: Array[StringName] = [])
 
 // Get all input events defined in the InputMap for the given action name, returns an empty array if the action does not exist.
-get_all_inputs_for_action(action: String) -> Array[InputEvent]
+func get_all_inputs_for_action(action: String) -> Array[InputEvent]
 
 // Get all keyboard input events defined in the InputMap for the given action name, returns an empty array if the action does not exist.
-get_keyboard_inputs_for_action(action: String) -> Array[InputEvent]
+func get_keyboard_inputs_for_action(action: String) -> Array[InputEvent]
 
 // Get the first keyboard input for the given action that exists in the InputMap
-get_keyboard_input_for_action(action: String) -> InputEvent
+func get_keyboard_input_for_action(action: String) -> InputEvent
 
 // Get all joypad input events defined in the InputMap for the given action name, returns an empty array if the action does not exist.
-get_joypad_inputs_for_action(action: String) -> Array[InputEvent]
+func get_joypad_inputs_for_action(action: String) -> Array[InputEvent]
 
 // Get the first joypad input for the given action that exists in the InputMap
-get_joypad_input_for_action(action: String) -> InputEvent
+func get_joypad_input_for_action(action: String) -> InputEvent
 ```
 
 ### InputControls
@@ -1515,7 +1508,7 @@ const FransenRobinsonConstant: float = 2.807770 //  FRANSEN ROBINSON'S CONSTANT,
 
 ### Methods
 
-```csharp
+```swift
 
 // "x": This is the input value between 0 and 1 that you want to apply the bias to.
 // It could represent a probability, a random number between 0 and 1, or any other value in that range.
@@ -1523,11 +1516,11 @@ const FransenRobinsonConstant: float = 2.807770 //  FRANSEN ROBINSON'S CONSTANT,
 // Example:
 // By adjusting the bias value, you can control how much the dice is skewed towards higher numbers.
 // A bias of 0.5 would result in a fair die roll. A bias closer to 1 would make it more likely to roll higher numbers.
-bias(x : float, _bias : float) -> float
+func bias(x : float, _bias : float) -> float
 
 // The sigmoid function, in its most common form, produces an "S"-shaped curve. It takes any real-valued number as input and outputs a value between 0 and 1.
 // The scaling_factor parameter is a modification that allows you to adjust the steepness and midpoint of the curve, giving you more control over its behavior.
-sigmoid(x: float, scaling_factor: float = 0.0) -> float
+func sigmoid(x: float, scaling_factor: float = 0.0) -> float
 
 // Dease calculates a smooth, accelerating transition value over time
 // Sharpness should be a value between 0 and 1
@@ -1537,62 +1530,60 @@ sigmoid(x: float, scaling_factor: float = 0.0) -> float
 // Progress Bars: Simulate the filling of progress bars with a smooth, accelerating effect.
 // Sound Volume Control: Gradually increase or decrease the volume of sound effects or music.
 // Visual Effects: Create smooth transitions for visual effects like particle systems or screen shakes.
-dease(delta: float, sharpness: float = 0.5) -> float:
+func dease(delta: float, sharpness: float = 0.5) -> float:
 
+func average(numbers: Array = []) -> float
 
-average(numbers: Array = []) -> float
+func spread(scale: float = 1.0) -> float
 
-spread(scale: float = 1.0) -> float
+func get_percentage(max_value: int, value: int) -> int
 
-get_percentage(max_value: int, value: int) -> int
-
-chance(probability_chance: float = 0.5, less_than: bool = true) -> bool
+func chance(probability_chance: float = 0.5, less_than: bool = true) -> bool
 
 
 // https://en.wikipedia.org/wiki/Factorial
 // This function calculates the factorial of a given non-negative integer number. The factorial of a number n (denoted as n!) is the product of all positive integers less than or equal to n
-factorial(number)
-factorial(5) // Returns 120 (5 * 4 * 3 * 2 * 1 = 120)
+func factorial(number)
+func factorial(5) // Returns 120 (5 * 4 * 3 * 2 * 1 = 120)
 
 // This function generates an array containing the factorials of all non-negative integers from 0 up to and including the given number
-factorials_from(number) -> Array[float]:
-factorials_from(5) // Returns [1, 1, 2, 6, 24, 120]
+func factorials_from(number) -> Array[float]:
+func factorials_from(5) // Returns [1, 1, 2, 6, 24, 120]
 
 
 // Only for radians
 // If the target angle is in degrees just transform it with deg_to_rad(target_angle)
-quantize_angle_to_90(target_angle: float) -> float:
+func quantize_angle_to_90(target_angle: float) -> float:
 
 // Only for radians
-angle_is_between(angle: float, start_angle: float, end_angle: float) -> bool
+func angle_is_between(angle: float, start_angle: float, end_angle: float) -> bool
 
 // This function assumes that the cardinal direction is in radians unit.
 // https://en.wikipedia.org/wiki/Cardinal_direction
-angle_from_cardinal_direction(cardinal_direction: float) -> float
+func angle_from_cardinal_direction(cardinal_direction: float) -> float
 
-limit_horizontal_angle(direction: Vector2, limit_angle: float) -> Vector2
+func limit_horizontal_angle(direction: Vector2, limit_angle: float) -> Vector2
 
 
 // Quaternions are a mathematical representation commonly used in 3D graphics to represent rotations.
 // Axis-angle representation specifies a rotation by an axis vector and the angle of rotation around that axis
 // Useful for Animation or Inverse Kinematics, Gimbal lock (when rotations get stuck or limited), Data storage or Transmission
-quaternion_to_axis_angle(quaternion : Quaternion) -> Quaternion
+func quaternion_to_axis_angle(quaternion : Quaternion) -> Quaternion
 
 //Transform from integer to roman or from roman to integer easily with this functions.
-integer_to_roman_number(number: int) -> String
+func integer_to_roman_number(number: int) -> String
 integer_to_roman_number(1994) // "MCMXCIV"
 
-roman_number_to_integer(roman_number: String) -> int
+func roman_number_to_integer(roman_number: String) -> int
 roman_number_to_integer( "MCMXCIV") // 1994
 
-hexadecimal_to_decimal(hex: String) -> int:
+func hexadecimal_to_decimal(hex: String) -> int:
 hexadecimal_to_decimal("FF") // 255
 
-decimal_to_hexadecimal(decimal: int) -> String
+func decimal_to_hexadecimal(decimal: int) -> String
 decimal_to_hexadecimal(255) // "FF
 
 value_is_between(number: int, min_value: int, max_value: int, inclusive: = true) -> bool
-
 
 /**
 if value_is_between(10, 5, 15) // True, Inclusive range (default)
@@ -1602,12 +1593,12 @@ if value_is_between(15, 5, 15, false):  //False, not Inclusive range
 	 // do stuff..
 */
 
-decimal_value_is_between(number: float, min_value: float, max_value: float, inclusive: = true, precision: float = 0.00001) -> bool
+func decimal_value_is_between(number: float, min_value: float, max_value: float, inclusive: = true, precision: float = 0.00001) -> bool
 
 
 //Formats a number (integer or float) with comma separators for thousands. This improves readability for large numbers.
 // If the absolute value of the number is less than 1000, it is simply converted to a string and returned without any modification
-add_thousand_separator(number, separator: String = ",") -> String:
+func add_thousand_separator(number, separator: String = ",") -> String:
 
 add_thousand_separator(1000) // 1,000
 add_thousand_separator(1000000) // 1,000,000
@@ -1615,78 +1606,77 @@ add_thousand_separator(9999448828) // 1,289,128,918,921
 add_thousand_separator(1289128918921, ".") // 9.999.448.828
 
 
-big_round(num: int) -> int:
+func big_round(num: int) -> int:
 
 
-volume_of_sphere(radius: float) -> float
+func volume_of_sphere(radius: float) -> float
 
-volume_of_hollow_sphere(outer_radius: float, inner_radius: float) -> float
+func volume_of_hollow_sphere(outer_radius: float, inner_radius: float) -> float
 
-area_of_circle(radius: float) -> float
+func area_of_circle(radius: float) -> float
 
-area_of_triangle(base: float, perpendicular_height: float) -> float
+func area_of_triangle(base: float, perpendicular_height: float) -> float
 
 // https://stackoverflow.com/questions/1073336/circle-line-segment-collision-detection-algorithm
-segment_circle_intersects(start, end, center, radius) -> Array
+func segment_circle_intersects(start, end, center, radius) -> Array
 
 // Returns intersection point(s) of a segment from 'a' to 'b' with a given rect, in order of increasing distance from 'a'
-segment_rect_intersects(a, b, rect) -> Array
+func segment_rect_intersects(a, b, rect) -> Array
 
 // https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Rectangle_difference
-rect_difference(r1: Rect2, r2: Rect2) -> Array
+func rect_difference(r1: Rect2, r2: Rect2) -> Array
 
 
-random_byte() -> int
+func random_byte() -> int
 
-logbi(x: int, base: int = 10) -> int
+func logbi(x: int, base: int = 10) -> int
 
-logb(x: float, base: float = 10.0) -> float
+func logb(x: float, base: float = 10.0) -> float
 
-generate_random_seed(seed_range: int = 10) -> String
+func generate_random_seed(seed_range: int = 10) -> String
 ```
 
-### BitStream 💠
+## BitStream 💠
 
 The BitStream class offers a powerful tool for working with data in a bit-oriented manner. It allows you to efficiently pack and unpack integer values and strings into a compact format, saving memory and potentially improving performance compared to traditional string storage.
 
 **_This is not a static class, you need to instantiate a new class for each bitstream you want to manipulate._**
 
-```csharp
+```swift
 
 var bits: Array
 var current_bit = 0
 
 
 //Packs an integer value (value) within a specified range (range_max) into the bit stream, converting it into individual bits.
-push(value: int, range_max: int)
+func push(value: int, range_max: int)
 
  //Appends a single bit _(True or False)_ to the bit stream.
-push_bit(bit: bool)
+func push_bit(bit: bool)
 
 // Reads and unpacks an integer value within a specified range (range_max) from the bit stream, interpreting the next num_bits as the value.
-pull(range_max:int)
+func pull(range_max:int)
 
 //Convert the bit stream to and from a Godot string format for basic data exchange.
-to_godot_string(), from_godot_string(string: String)
+func to_godot_string(), from_godot_string(string: String)
 
 //Prints a human-readable representation of the bit stream as a sequence of 0s and 1s for debugging.
-pprint():
+func pprint():
 
 //Convert the bit stream to and from a packed byte array for more advanced manipulation.
-to_byte_array() -> PackedByteArray
-from_byte_array(byte_array: PackedByteArray) -> Bitstream
+func to_byte_array() -> PackedByteArray
+func from_byte_array(byte_array: PackedByteArray) -> Bitstream
 
 //  Convert the bit stream to and from UTF-8 encoded text, allowing storage in a file or transmission over a network.
-to_utf8() -> String
-from_utf8(utf8_string: String) -> Bitstream
+func to_utf8() -> String
+func from_utf8(utf8_string: String) -> Bitstream
 
 // Convert the bit stream to and from an ASCII string representation.
-to_ascii_string() -> String
-from_ascii_string(string: String) -> Bitstream
+func to_ascii_string() -> String
+func from_ascii_string(string: String) -> Bitstream
 
 //  Reads a string of 0s and 1s and interprets it as a bit stream, initializing the internal data.
-from_string(string: String)
-
+func from_string(string: String)
 ```
 
 The BitStream can be used in a lot of places, here we provide a super minimal example but if you understand the concept you can easily transmit a lot of data via network using bitstreams instead of plain text
@@ -1752,14 +1742,12 @@ enum SpeedUnit {
 }
 
 // It can receive a Vector2 & Vector3 as velocity and it will return the speed on the unit selected (Km or Miles)
-current_speed_on(speed_unit: SpeedUnit, velocity) -> float:
+func current_speed_on(speed_unit: SpeedUnit, velocity) -> float:
 
 // Alternatively, you can use the corresponding function for the desired velocity unit
-current_speed_on_miles_per_hour(velocity) -> float:
+func current_speed_on_miles_per_hour(velocity) -> float:
 
-current_speed_on_kilometers_per_hour(velocity) -> float:
-
-
+func current_speed_on_kilometers_per_hour(velocity) -> float:
 ```
 
 ## Network 📶
@@ -1767,13 +1755,12 @@ current_speed_on_kilometers_per_hour(velocity) -> float:
 The `NetworkHelper` class provide functions that have to do with network operations
 
 ```swift
-get_local_ip(ip_type: IP.Type = IP.Type.TYPE_IPV4) -> String:
+func get_local_ip(ip_type: IP.Type = IP.Type.TYPE_IPV4) -> String:
 
-is_valid_url(url: String) -> bool
+func is_valid_url(url: String) -> bool
 
 // If the url is valid open a external link, when it detects that the current platform where is running the game is "Web' the url is encoded
-open_external_link(url: String) -> void
-
+func open_external_link(url: String) -> void
 ```
 
 ## Nodes ⭕
@@ -1792,32 +1779,32 @@ Here's a breakdown of the benefits:
 
 The `NodePositioner` class helps to simplify operations related to node positioning
 
-```csharp
-local_direction_to_v2(a: Node2D, b: Node2D) -> Vector2
-local_direction_to_v3(a: Node3D, b: Node3D) -> Vector3
+```swift
+func local_direction_to_v2(a: Node2D, b: Node2D) -> Vector2
+func local_direction_to_v3(a: Node3D, b: Node3D) -> Vector3
 
-global_direction_to_v2(a: Node2D, b: Node2D) -> Vector2
-global_direction_to_v3(a: Node3D, b: Node3D) -> Vector3
+func global_direction_to_v2(a: Node2D, b: Node2D) -> Vector2
+func global_direction_to_v3(a: Node3D, b: Node3D) -> Vector3
 
-local_distance_to_v2(a: Node2D, b: Node2D) -> float
-local_distance_to_v3(a: Node3D, b: Node3D) -> float
+func local_distance_to_v2(a: Node2D, b: Node2D) -> float
+func local_distance_to_v3(a: Node3D, b: Node3D) -> float
 
-global_distance_to_v2(a: Node2D, b: Node2D) -> float
-global_distance_to_v3(a: Node2D, b: Node2D) -> float
+func global_distance_to_v2(a: Node2D, b: Node2D) -> float
+func global_distance_to_v3(a: Node2D, b: Node2D) -> float
 
 
-mouse_grid_snap(node: Node2D, size: int, use_local_position: bool = false) -> Vector2
+func mouse_grid_snap(node: Node2D, size: int, use_local_position: bool = false) -> Vector2
 
-mouse_grid_snap_by_texture(sprite: Sprite2D, use_local_position: bool = false) -> Vector2
+func mouse_grid_snap_by_texture(sprite: Sprite2D, use_local_position: bool = false) -> Vector2
 
 // Use on _process or _physic_process
-rotate_toward_v2(from: Node2D, to: Node2D, lerp_weight: float = 0.5) -> void
+func rotate_toward_v2(from: Node2D, to: Node2D, lerp_weight: float = 0.5) -> void
 // Use on _process or _physic_process
-rotate_toward_v3(from: Node3D, to: Node3D, lerp_weight: float = 0.5) -> void
+func rotate_toward_v3(from: Node3D, to: Node3D, lerp_weight: float = 0.5) -> void
 
-align_nodes_v2(from: Node2D, to: Node2D, align_position: bool = true, align_rotation: bool = true) -> void
+func align_nodes_v2(from: Node2D, to: Node2D, align_position: bool = true, align_rotation: bool = true) -> void
 
-align_nodes_v3(from: Node3D, to: Node3D, align_position: bool = true, align_rotation: bool = true) -> void
+func align_nodes_v3(from: Node3D, to: Node3D, align_position: bool = true, align_rotation: bool = true) -> void
 
 
 // These functions help you locate nodes within a specific distance range relative to a given point. The nodes in the array needs to inherit from Node2D or Node3D as they have global_position vectors in the world although these functions internally apply the necessary filters to only work with valid nodes.
@@ -1828,72 +1815,73 @@ align_nodes_v3(from: Node3D, to: Node3D, align_position: bool = true, align_rota
 // - distance: The distance between the from point and the found node (or null if none is found).
 // -------
 
-get_nearest_node_by_distance(from: Vector2, nodes: Array = [], min_distance: float = 0.0, max_range: float = 9999) -> Dictionary
+func get_nearest_node_by_distance(from: Vector2, nodes: Array = [], min_distance: float = 0.0, max_range: float = 9999) -> Dictionary
 
-get_nearest_nodes_sorted_by_distance(from: Vector2, nodes: Array = [], min_distance: float = 0.0, max_range: float = 9999) -> Array
+func get_nearest_nodes_sorted_by_distance(from: Vector2, nodes: Array = [], min_distance: float = 0.0, max_range: float = 9999) -> Array
 
-get_farthest_node_by_distance(from: Vector2, nodes: Array = [], min_distance: float = 0.0, max_range: float = 9999) -> Dictionary
-
+func get_farthest_node_by_distance(from: Vector2, nodes: Array = [], min_distance: float = 0.0, max_range: float = 9999) -> Dictionary
 ```
 
 ### Node Traversal
 
 The `NodeTraversal` class helps to simplify operations related to traverse the `SceneTree`
 
-```csharp
+```swift
 // Useful when you need to add a node in the scene tree in your @tool scripts.
 // It checks for you if the Engine.is_editor_hint()
-set_owner_to_edited_scene_root(node: Node) -> void
+func set_owner_to_edited_scene_root(node: Node) -> void
 
-get_all_children(from_node: Node) -> Array:
-get_all_ancestors(from_node: Node) -> Array:
+func get_all_children(from_node: Node) -> Array:
+func get_all_ancestors(from_node: Node) -> Array:
 
 //Only works for native nodes that Godot provides like Area2D, Camera2D, etc.
 //Example NodePositioner.find_nodes_of_type(self, Sprite2D.new())
-find_nodes_of_type(node: Node, type_to_find: Node) -> Array
-first_node_of_type(node: Node, type_to_find: Node) -> Array
+func find_nodes_of_type(node: Node, type_to_find: Node) -> Array
+func first_node_of_type(node: Node, type_to_find: Node) -> Array
 
 // Only works for native custom class not for GDScriptNativeClass
 // Example NodePositioner.find_nodes_of_custom_class(self, MachineState)
-find_nodes_of_custom_class(node: Node, class_to_find: Variant) -> Array:
-first_node_of_custom_class(node: Node, class_to_find: GDScript):
+func find_nodes_of_custom_class(node: Node, class_to_find: Variant) -> Array:
+func first_node_of_custom_class(node: Node, class_to_find: GDScript):
 
 // Get the tree depth from a node so you can know how deep is on the current scene.
-get_tree_depth(node: Node) -> int
+func get_tree_depth(node: Node) -> int
 
-get_absolute_z_index(node: Node2D) -> int
+func get_absolute_z_index(node: Node2D) -> int
 
 // This function simplifies your life by grabbing the first child node from a parent node, just like picking the firsts item from a list.
-get_first_child(node: Node):
+func get_first_child(node: Node):
 
 // This function simplifies your life by grabbing the last child node from a parent node, just like picking the last item from a list.
-get_last_child(node: Node)
+func get_last_child(node: Node)
 
-first_child_node_in_group(node: Node, group: String)
+func first_child_node_in_group(node: Node, group: String)
 
-hide_nodes(nodes: Array[Node] = []) -> void
-show_nodes(nodes: Array[Node] = []) -> void
+func hide_nodes(nodes: Array[Node] = []) -> void
+func show_nodes(nodes: Array[Node] = []) -> void
 
-add_all_childrens_to_group(node: Node, group: String, filter: Array[Node] = []) -> void
-remove_all_childrens_from_group(node: Node, group: String, filter: Array[Node] = []) -> void:
+func add_all_childrens_to_group(node: Node, group: String, filter: Array[Node] = []) -> void
+func remove_all_childrens_from_group(node: Node, group: String, filter: Array[Node] = []) -> void:
 
-add_meta_to_all_children(node: Node, meta: String, value: Variant, filter: Array[Node] = []) -> void
-remove_meta_from_all_children(node: Node, meta: String) -> void
+func add_meta_to_all_children(node: Node, meta: String, value: Variant, filter: Array[Node] = []) -> void
+func remove_meta_from_all_children(node: Node, meta: String) -> void
 ```
 
 ### Node Remover
 
 The `NodeRemover` class helps to simplify operations related to node removal
 
-```csharp
+```swift
 // A safe function to remove only valid nodes
-remove(node: Node) -> void
+func remove(node: Node) -> void
 
 // This functions help you declutter your scene by removing all child nodes from a parent node. They handle the cleanup process efficiently, so you don't have to write repetitive code.
 // --- Exceptions are passed as [Area3D.new().get_class) ---
-remove_and_queue_free_children(node: Node) -> void
-queue_free_children(node: Node) -> void
-free_children(node: Node, except: Array = []) -> void:
+func remove_and_queue_free_children(node: Node) -> void
+
+func queue_free_children(node: Node) -> void
+
+func free_children(node: Node, except: Array = []) -> void:
 
 ```
 
@@ -1905,36 +1893,35 @@ This classes help to handle known data structures and simplify many operations b
 
 The `ArrayHelper` class provides useful functions to work with Arrays and manage complex operations with ease.
 
-```csharp
-sum(values: Array[int]) -> int
+```swift
+func sum(values: Array[int]) -> int
 
-sum_floats(values: Array[float]) -> float
+func sum_floats(values: Array[float]) -> float
 
-repeat(element: Variant, times: int) -> Array[Variant]
+func repeat(element: Variant, times: int) -> Array[Variant]
 
 // Flatten any array with n dimensions recursively
-flatten(array: Array[Variant])
+func flatten(array: Array[Variant])
 
-pick_random_values(array: Array[Variant], items_to_pick: int = 1, duplicates: bool = true) -> Array[Variant]
+func pick_random_values(array: Array[Variant], items_to_pick: int = 1, duplicates: bool = true) -> Array[Variant]
 
-remove_duplicates(array: Array[Variant]) -> Array[Variant]
+func remove_duplicates(array: Array[Variant]) -> Array[Variant]
 
-remove_falsy_values(array: Array[Variant]) -> Array[Variant]
+func remove_falsy_values(array: Array[Variant]) -> Array[Variant]
 
-middle_element(array: Array[Variant])
+func middle_element(array: Array[Variant])
 
 // This method works in a circular way, this means that is the from value is the last, it returns the first one in the array
-next_element_from_value(array: Array[Variant], value: Variant) -> Variant
+func next_element_from_value(array: Array[Variant], value: Variant) -> Variant
 
 // Return a dictionary with the array value as key and the frequency count as value
-frequency(array: Array[Variant]) -> Dictionary
+func frequency(array: Array[Variant]) -> Dictionary
 
 // To detect if a contains elements of b
-intersects(a: Array[Variant], b: Array[Variant]) -> bool
-intersected_elements(a: Array[Variant], b: Array[Variant]) -> Array[Variant]
+func intersects(a: Array[Variant], b: Array[Variant]) -> bool
+func intersected_elements(a: Array[Variant], b: Array[Variant]) -> Array[Variant]
 
-merge_unique(first: Array[Variant], second: Array[Variant]) -> Array[Variant]
-
+func merge_unique(first: Array[Variant], second: Array[Variant]) -> Array[Variant]
 
 // Separates an Array into smaller array:
 // argument 1: array that is going to be converted
@@ -1948,28 +1935,28 @@ merge_unique(first: Array[Variant], second: Array[Variant]) -> Array[Variant]
 // Example 2:
 // ArrayHelper.chunk([1,2,3,4,5,6,7,8,9], 4)
 // [1,2,3,4,5,6,7,8,9] -> [[1, 2, 3, 4], [5, 6, 7, 8], [9]]
-chunk(array: Array[Variant], size: int, only_chunks_with_same_size: bool = false)
+func chunk(array: Array[Variant], size: int, only_chunks_with_same_size: bool = false)
 ```
 
 ### Dictionary
 
 The `ArrayHelper` class provides useful functions to work with Dictionaries and manage complex operations with ease.
 
-```csharp
-contain_all_keys(target: Dictionary, keys: Array[String]) -> bool
+```swift
+func contain_all_keys(target: Dictionary, keys: Array[String]) -> bool
 
-contain_any_key(target: Dictionary, keys: Array[String]) -> bool
+func contain_any_key(target: Dictionary, keys: Array[String]) -> bool
 
-reverse_key_value(source_dict: Dictionary) -> Dictionary
+func reverse_key_value(source_dict: Dictionary) -> Dictionary
 
-merge_recursive(dest: Dictionary, source: Dictionary) -> void:
+func merge_recursive(dest: Dictionary, source: Dictionary) -> void:
 ```
 
 ### Enum
 
 The `ArrayHelper` class provides useful functions to work with Enums.
 
-```csharp
+```swift
 func random_value_from(_enum) -> Variant
 ```
 
@@ -1977,7 +1964,7 @@ func random_value_from(_enum) -> Variant
 
 The `VectorHelper` class provides a collection of commonly used vector methods that can simplify your everyday game development tasks. While it offers a wide range of functions, in-depth documentation might not be available for every method. However, the method names themselves are designed to be clear and descriptive.
 
-```csharp
+```swift
 // This class contains few variables that holds all directions that may be available for quick checks in your game
 
 static var directions_v2: Array[Vector2] = [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]
@@ -2010,55 +1997,55 @@ static var opposite_directions_v3: Dictionary = {
 }
 
 // Converts Vectors like Vector3(1, 0, 0) into Vector3(0, 1, 1)
-invert_vector(vector: Vector3) -> Vector3
+func invert_vector(vector: Vector3) -> Vector3
 
 
 //This method calculates the opposite of a given upward direction vector in 2D space. For example, if your CharacterBody2D uses Vector2.UP as its up_direction, the opposite would be Vector2.DOWN.
 // --------------
 // This function is useful for applying gravity in the opposite direction of the player, allowing you to create inverted gravity or flipped worlds. Even when your player changes their up direction to Vector2.DOWN, this method will correctly return Vector2.UP so you can set gravity pulls player in that direction.
-up_direction_opposite_vector2(up_direction: Vector2) -> Vector2
+func up_direction_opposite_vector2(up_direction: Vector2) -> Vector2
 
-up_direction_opposite_vector3(up_direction: Vector3) -> Vector3
-
-
-generate_2d_random_directions_using_degrees(num_directions: int = 10, origin: Vector2 = Vector2.UP, min_angle: float = 0.0, max_angle: float = 360.0) -> Array[Vector2]
-
-generate_2d_random_directions_using_radians(num_directions: int = 10, origin: Vector2 = Vector2.UP, min_angle: float = 0.0, max_angle: float = 6.2831853072) -> Array[Vector2]
-
-generate_3d_random_directions_using_degrees(num_directions: int = 10, origin: Vector3 = Vector3.UP, min_angle: float = 0.0, max_angle: float = 360.0) -> Array[Vector3]
-
-generate_3d_random_directions_using_radians(num_directions: int = 10, origin: Vector3 = Vector3.UP, min_angle: float = 0.0, max_angle: float = 6.2831853072) -> Array[Vector3]
+func up_direction_opposite_vector3(up_direction: Vector3) -> Vector3
 
 
-generate_random_angle_in_radians(min_angle: float = 0.0, max_angle: float = 6.2831853072) -> float
+func generate_2d_random_directions_using_degrees(num_directions: int = 10, origin: Vector2 = Vector2.UP, min_angle: float = 0.0, max_angle: float = 360.0) -> Array[Vector2]
 
-generate_random_angle_in_degrees(min_angle: float = 0.0, max_angle: float = 360.0) -> float
+func generate_2d_random_directions_using_radians(num_directions: int = 10, origin: Vector2 = Vector2.UP, min_angle: float = 0.0, max_angle: float = 6.2831853072) -> Array[Vector2]
 
-generate_2d_random_fixed_direction() -> Vector2
+func generate_3d_random_directions_using_degrees(num_directions: int = 10, origin: Vector3 = Vector3.UP, min_angle: float = 0.0, max_angle: float = 360.0) -> Array[Vector3]
 
-generate_3d_random_fixed_direction() -> Vector3
+func generate_3d_random_directions_using_radians(num_directions: int = 10, origin: Vector3 = Vector3.UP, min_angle: float = 0.0, max_angle: float = 6.2831853072) -> Array[Vector3]
 
-generate_2d_random_direction() -> Vector2
 
-generate_3d_random_direction() -> Vector3
+func generate_random_angle_in_radians(min_angle: float = 0.0, max_angle: float = 6.2831853072) -> float
+
+func generate_random_angle_in_degrees(min_angle: float = 0.0, max_angle: float = 360.0) -> float
+
+func generate_2d_random_fixed_direction() -> Vector2
+
+func generate_3d_random_fixed_direction() -> Vector3
+
+func generate_2d_random_direction() -> Vector2
+
+func generate_3d_random_direction() -> Vector3
 
 // Translate -1.0, 0 and 1.0 values from getting the input axis into a Vector2
-translate_x_axis_to_vector(axis: float) -> Vector2
+func translate_x_axis_to_vector(axis: float) -> Vector2
 
-translate_y_axis_to_vector(axis: float) -> Vector2
+func translate_y_axis_to_vector(axis: float) -> Vector2
 
 // Normalize the vector taking into account if it's diagonal
-normalize_vector2(value: Vector2) -> Vector2
+func normalize_vector2(value: Vector2) -> Vector2
 
-normalize_diagonal_vector2(direction: Vector2) -> Vector2
+func normalize_diagonal_vector2(direction: Vector2) -> Vector2
 
-normalize_vector3(value: Vector3) -> Vector3
+func normalize_vector3(value: Vector3) -> Vector3
 
-normalize_diagonal_vector3(direction: Vector3) -> Vector3
+func normalize_diagonal_vector3(direction: Vector3) -> Vector3
 
-is_diagonal_direction_v2(direction: Vector2) -> bool
+func is_diagonal_direction_v2(direction: Vector2) -> bool
 
-is_diagonal_direction_v3(direction: Vector3) -> bool
+func is_diagonal_direction_v3(direction: Vector3) -> bool
 
 // -------------
 // Explanation: These functions perform a distance check between two vectors but use a squared distance comparison instead of calculating the actual distance. They determine if the squared distance between the vector and second_vector is less than or equal to the square of the provided distance.
@@ -2069,37 +2056,37 @@ is_diagonal_direction_v3(direction: Vector3) -> bool
 
 // ----- Important Note -----
 // While using squared distances offers a performance benefit, keep in mind that it doesn't give you the actual distance between the points. If you need the actual distance for calculations or other purposes, you'll need to perform a square root operation on the result of is_withing_distance_squared
-is_withing_distance_squared_v2(vector: Vector2, second_vector: Vector2, distance: float) -> bool
+func is_withing_distance_squared_v2(vector: Vector2, second_vector: Vector2, distance: float) -> bool
 
-is_withing_distance_squared_v3(vector: Vector3, second_vector: Vector3, distance: float) -> bool
+func is_withing_distance_squared_v3(vector: Vector3, second_vector: Vector3, distance: float) -> bool
 
 
 // Transforms a rotation angle in radians into a Vector in space
-direction_from_rotation_v2(rotation: float) -> Vector2
+func direction_from_rotation_v2(rotation: float) -> Vector2
 
-direction_from_rotation_v3(rotation: float) -> Vector3
+func direction_from_rotation_v3(rotation: float) -> Vector3
 
-direction_from_rotation_degrees_v2(rotation_degrees: float) -> Vector2
+func direction_from_rotation_degrees_v2(rotation_degrees: float) -> Vector2
 
-direction_from_rotation_degrees_v3(rotation_degrees: float) -> Vector3
+func direction_from_rotation_degrees_v3(rotation_degrees: float) -> Vector3
 
 // Use Case: Imagine creating a dynamic light source that simulates a flickering torch or a spotlight with a slight wobble. You can leverage the rotate_horizontal_random and rotate_vertical_random functions to achieve this effect.
 
 // Rotate the vector in a random horizontal direction [Vector2.RIGHT, Vector2.LEFT]
-rotate_horizontal_random(origin: Vector3 = Vector3.ONE) -> Vector3
+func rotate_horizontal_random(origin: Vector3 = Vector3.ONE) -> Vector3
 
 // Rotate the vector in a random vertical direction  [Vector2.UP, Vector2.DOWN]
-rotate_vertical_random(origin: Vector3 = Vector3.ONE) -> Vector3
+func rotate_vertical_random(origin: Vector3 = Vector3.ONE) -> Vector3
 
 
-vec3_from_color_rgb(color: Color) -> Vector3
+func vec3_from_color_rgb(color: Color) -> Vector3
 
-vec3_from_color_hsv(color: Color) -> Vector3
+func vec3_from_color_hsv(color: Color) -> Vector3
 
 
-get_position_by_polar_coordinates_v2(center_position: Vector2, angle_radians: float, radius: float) -> Vector2
+func get_position_by_polar_coordinates_v2(center_position: Vector2, angle_radians: float, radius: float) -> Vector2
 
-get_position_by_polar_coordinates_v3(center_position: Vector3, angle_radians: float, radius: float) -> Vector3
+func get_position_by_polar_coordinates_v3(center_position: Vector3, angle_radians: float, radius: float) -> Vector3
 
 
 // -------------
@@ -2108,10 +2095,10 @@ get_position_by_polar_coordinates_v3(center_position: Vector3, angle_radians: fl
 // Explanation: These functions calculate the Manhattan distance (also known as L1 distance or city block distance) between two points. It represents the total distance traveled by moving horizontally and vertically along a grid, ignoring any diagonal movement.
 
 // Use Case: Imagine a pathfinding algorithm on a grid-based map. Manhattan distance can be used to estimate the distance between two points on the grid, as **movement is restricted to horizontal and vertical steps.
-distance_manhattan_v2(a: Vector2, b: Vector2) -> float
-distance_manhattan_v3(a: Vector3, b: Vector3) -> float
-length_manhattan_v2(a : Vector2) -> float
-length_manhattan_v3(a : Vector3) -> float
+func distance_manhattan_v2(a: Vector2, b: Vector2) -> float
+func distance_manhattan_v3(a: Vector3, b: Vector3) -> float
+func length_manhattan_v2(a : Vector2) -> float
+func length_manhattan_v3(a : Vector3) -> float
 
 // -------------
 // Also known as the "chess distance" or "L∞ distance". It measures the distance between two points as the greater of the absolute differences of their coordinates in each dimension.
@@ -2119,17 +2106,17 @@ length_manhattan_v3(a : Vector3) -> float
 // Explanation: These functions calculate the Chebyshev distance *(also known as L∞ distance or chessboard distance)* between two points. It represents the maximum absolute difference of the coordinates between the points, similar to a king's movement in chess (only horizontal, vertical, or diagonal steps of one square).
 
 // Use Case: Imagine a tower defense game where enemies can only move horizontally or vertically along pre-defined paths. Chebyshev distance can be used to determine the enemy's "attack range" based on the maximum distance they can travel in a single move.
-distance_chebyshev_v2(a: Vector2, b: Vector2) -> float
-distance_chebyshev_v3(a: Vector3, b: Vector3) -> float
-length_chebyshev_v2(a : Vector2) -> float
-length_chebyshev_v3(a : Vector3) -> float
+func distance_chebyshev_v2(a: Vector2, b: Vector2) -> float
+func distance_chebyshev_v3(a: Vector3, b: Vector3) -> float
+func length_chebyshev_v2(a : Vector2) -> float
+func length_chebyshev_v3(a : Vector3) -> float
 
 // -------------
 // Explanation: These functions calculate the closest point on a line segment (defined by points a and b) to a third point c. Additionally, they clamp the result to ensure the closest point lies within the line segment (between a and b).
 
 // Use Case: Imagine a character trying to navigate around an obstacle. This function can be used to find the closest point on the obstacle's edge (line segment) that the character can reach from their current position (c).
-closest_point_on_line_clamped_v2(a: Vector2, b: Vector2, c: Vector2) -> Vector2
-closest_point_on_line_clamped_v3(a: Vector3, b: Vector3, c: Vector3) -> Vector3
+func closest_point_on_line_clamped_v2(a: Vector2, b: Vector2, c: Vector2) -> Vector2
+func closest_point_on_line_clamped_v3(a: Vector3, b: Vector3, c: Vector3) -> Vector3
 
 
 // -------------
@@ -2138,13 +2125,10 @@ closest_point_on_line_clamped_v3(a: Vector3, b: Vector3, c: Vector3) -> Vector3
 // Explanation: These functions are similar to the clamped versions, but they calculate the closest point on the line segment without clamping. The non-normalized versions return the actual vector representing the closest point, while the normalized versions might return a parameter along the line segment that represents the closest point.
 
 // Use Case: Imagine a projectile being fired towards a moving target. These functions can be used to determine the point on the target's projected path (line segment) that the projectile is most likely to collide with, even if the collision happens outside the actual line segment itself.
-closest_point_on_line_v2(a: Vector2, b: Vector2, c: Vector2) -> Vector2
-closest_point_on_line_v3(a: Vector3, b: Vector3, c: Vector3) -> Vector3
-closest_point_on_line_normalized_v2(a: Vector2, b: Vector2, c: Vector2) -> float
-closest_point_on_line_normalized_v3(a: Vector3, b: Vector3, c: Vector3) -> float
-
-
-
+func closest_point_on_line_v2(a: Vector2, b: Vector2, c: Vector2) -> Vector2
+func closest_point_on_line_v3(a: Vector3, b: Vector3, c: Vector3) -> Vector3
+func closest_point_on_line_normalized_v2(a: Vector2, b: Vector2, c: Vector2) -> float
+func closest_point_on_line_normalized_v3(a: Vector3, b: Vector3, c: Vector3) -> float
 ```
 
 ### Semantic version (Semver)
@@ -2154,7 +2138,7 @@ The `SemanticVersion` class provides a structured way to represent and compare s
 - `major, minor, patch`: Integer values representing the major, minor, and patch version numbers, respectively.
 - `state`: An optional string for pre-release or build metadata _(e.g., "-rc.1", "-alpha.2")_
 
-```csharp
+```swift
 class_name SemanticVersion extends RefCounted
 
 var major: int
@@ -2164,17 +2148,17 @@ var patch: int
 var state: String = ""
 
 
-_init(_major: int, _minor: int, _patch: int, _state: String = "") -> void
+func _init(_major: int, _minor: int, _patch: int, _state: String = "") -> void
 
 // Parses a string representation of a semantic version number (e.g., "1.2.3") and returns a SemanticVersion object.
 //This method will only parse the major, minor, and patch numbers, and ignore non digit or period characters.
-parse(value: String) -> SemanticVersion
+func parse(value: String) -> SemanticVersion
 
 // Compares this SemanticVersion instance with another and returns true if they are equal, false otherwise. Equality is determined by comparing the major, minor, and patch numbers.
-equals(other: SemanticVersion) -> bool
+func equals(other: SemanticVersion) -> bool
 
 // Compares this SemanticVersion instance with another and returns true if this instance is greater than the other, false otherwise. Comparison follows semantic versioning rules (major > minor > patch). The state variable is not used in the comparison.
-is_greater(other: SemanticVersion) -> bool
+func is_greater(other: SemanticVersion) -> bool
 	if major > other.major:
 		return true
 
@@ -2184,7 +2168,7 @@ is_greater(other: SemanticVersion) -> bool
 	return major == other.major and minor == other.minor and patch > other.patch
 
 //Returns a string representation of the SemanticVersion in the format "vMajor.Minor.PatchState" (e.g., "v1.2.3-rc.1").
-_to_string() -> String
+func _to_string() -> String
 ```
 
 ## UUID 🔑
@@ -2201,21 +2185,21 @@ The `UUID` class in Godot provides a convenient way to generate and manage Unive
 - _Flexibility:_ Choose between the standard generation method or provide a custom random number generator for specific needs.
 - _Easy Integration:_ Convert the UUID to a string for display or transmit it as a byte array for internal processing.
 
-```csharp
+```swift
 // Generates a version 4 UUID according to the standard format.
-v4() -> String
+static func v4() -> String
 
 // Allows you to provide a custom random number generator for more control over the generation process.
-v4_rng(rng: RandomNumberGenerator) -> String
+static func v4_rng(rng: RandomNumberGenerator) -> String
 
 // Easily convert the generated UUID to a human-readable string format
-as_string()
+func as_string()
 
 //  Access the raw byte data of the UUID as an array
-as_array()
+func as_array()
 
 //  Check if two UUIDs are identical
-is_equal(other)
+func is_equal(other)
 ```
 
 To generate a new `UUID` just use `UUID.v4()` or if you want to provide a custom `RandomNumberGenerator` use `UUID.v4_rng(RandomNumberGenerator.new())`
@@ -2224,7 +2208,7 @@ To generate a new `UUID` just use `UUID.v4()` or if you want to provide a custom
 
 The `LabelHelper` class provide methods to manipulate text using the `Label` node
 
-```csharp
+```swift
 // Adjust the text inside a label using the max_size in pixels as reference
 func adjust_text(label: Label, max_size: int = 200) -> void
 ```
@@ -2248,50 +2232,49 @@ const bar: String = "█"
 
 ### Methods
 
-```csharp
+```swift
 // Generates a random string of a specified length using the provided character set. Defaults to a length of 25 and includes lowercase, uppercase letters, and numbers.
 // To ensure a valid string, it requires a length greater than 1 and at least one valid character. Otherwise, it returns an empty string.
-generate_random_string(length: int = 25, characters: String = AsciiAlphanumeric) -> String
+func generate_random_string(length: int = 25, characters: String = AsciiAlphanumeric) -> String
 
-camel_to_snake(camel_string: String) -> String
+func camel_to_snake(camel_string: String) -> String
 
-snake_to_camel_case(screaming_snake_case: String) -> String
+func snake_to_camel_case(screaming_snake_case: String) -> String
 
 // Clean a string by removing characters that are not letters (uppercase or lowercase), numbers or spaces, tabs or newlines.
-clean(string: String, include_numbers: bool = true) -> String
-
+func clean(string: String, include_numbers: bool = true) -> String
 
 // This function wraps the provided text into multiple lines if it exceeds the specified max_line_length
-wrap_text(text: String = "", max_line_length: int = 120)
+func wrap_text(text: String = "", max_line_length: int = 120)
 
 
-integer_to_ordinal(number: int) -> String
+func integer_to_ordinal(number: int) -> String
 integer_to_ordinal(1) // 1st
 integer_to_ordinal(2) // 2nd
 integer_to_ordinal(3) // 3rd
 integer_to_ordinal(4) // 4th
 //...
 
-pretty_number(number: float, suffixes: Array[String] = ["", "K", "M", "B", "T"]) -> String
+func pretty_number(number: float, suffixes: Array[String] = ["", "K", "M", "B", "T"]) -> String
 
-to_binary_string(num: int) -> String
+func to_binary_string(num: int) -> String
 
-strip_bbcode(source:String) -> String
+func strip_bbcode(source:String) -> String
 
-strip_filepaths(source: String) -> String
+func strip_filepaths(source: String) -> String
 
-str_replace(target: String, regex: RegEx, cb: Callable) -> String
+func str_replace(target: String, regex: RegEx, cb: Callable) -> String
 
-case_insensitive_comparison(one: String, two: String) -> bool
+func case_insensitive_comparison(one: String, two: String) -> bool
 
-is_whitespace(text: String) -> bool
+func is_whitespace(text: String) -> bool
 
-remove_whitespaces(text: String) -> String
+func remove_whitespaces(text: String) -> String
 
-repeat(text: String, times: int) -> String
+func repeat(text: String, times: int) -> String
 
 // Returns the character "█" the amount passed as parameter
-bars(amount: int, separator: String = "") -> String
+func bars(amount: int, separator: String = "") -> String
 bars(3) // "███"
 bars(3, " ") // "█ █ █"
 ```
@@ -2300,7 +2283,7 @@ bars(3, " ") // "█ █ █"
 
 The `TimeHelper` class provides useful methods to manipulate the time in-game.
 
-```csharp
+```swift
 class TimeHelper
 
 enum TimeUnit {
@@ -2336,22 +2319,22 @@ Example:
 	var formatted_time_with_ms = format_seconds(123.456, true)
 	# Result: "02:03:45"
 """
-format_seconds(time: float, use_milliseconds: bool = false) -> String
+func format_seconds(time: float, use_milliseconds: bool = false) -> String
 
 // Returns the amount of time passed since the engine started
-get_ticks(time_unit: TimeUnit = TimeUnit.Seconds) -> float
+func get_ticks(time_unit: TimeUnit = TimeUnit.Seconds) -> float
 
 // Returns the conversion of [method Time.get_ticks_usec] to seconds.
-get_ticks_seconds() -> float
+func get_ticks_seconds() -> float
 
-convert_to_seconds(time: float, origin_unit: TimeUnit) -> float
+func convert_to_seconds(time: float, origin_unit: TimeUnit) -> float
 
-convert_to(time: float, origin_unit: TimeUnit, target_unit: TimeUnit) -> float
+func convert_to(time: float, origin_unit: TimeUnit, target_unit: TimeUnit) -> float
 
 // Shorcuts to quickly create timers by code
-create_idle_timer(wait_time: float = 1.0, autostart: bool = false, one_shot: bool = false) -> Timer
+func create_idle_timer(wait_time: float = 1.0, autostart: bool = false, one_shot: bool = false) -> Timer
 
-create_physics_timer(wait_time: float = 1.0, autostart: bool = false, one_shot: bool = false) -> Timer
+func create_physics_timer(wait_time: float = 1.0, autostart: bool = false, one_shot: bool = false) -> Timer
 
 ```
 
@@ -2361,7 +2344,7 @@ The `Camera2DHelper` provides useful methods to manipulate and obtain informatio
 
 ```swift
 //This function aims to calculate a new camera position based on mouse movement, effectively simulating a panning camera effect.
-get_panning_camera_position(camera: Camera2D) -> Vector2
+func get_panning_camera_position(camera: Camera2D) -> Vector2
 ```
 
 ## Camera3D
@@ -2369,13 +2352,13 @@ get_panning_camera_position(camera: Camera2D) -> Vector2
 The `Camera3DHelper` provides useful methods to manipulate and obtain information from 3D cameras
 
 ```swift
-center_by_ray_origin(camera: Camera3D) -> Vector3
+func center_by_ray_origin(camera: Camera3D) -> Vector3
 
-center_by_origin(camera: Camera3D) -> Vector3
+func center_by_origin(camera: Camera3D) -> Vector3
 
-forward_direction(camera: Camera3D) -> Vector3
+func forward_direction(camera: Camera3D) -> Vector3
 
-is_facing_camera(camera: Camera3D, node: Node) -> bool
+func is_facing_camera(camera: Camera3D, node: Node) -> bool
 ```
 
 ## Texture
@@ -2383,12 +2366,11 @@ is_facing_camera(camera: Camera3D, node: Node) -> bool
 The `TextureHelper` provides useful methods to manipulate and obtain information from textures and sprites.
 
 ```swift
-get_texture_dimensions(texture: Texture2D) -> Rect2i
+func get_texture_dimensions(texture: Texture2D) -> Rect2i
 
-get_texture_rect_dimensions(texture_rect: TextureRect) -> Vector2
+func get_texture_rect_dimensions(texture_rect: TextureRect) -> Vector2
 
-get_sprite_dimensions(sprite: Sprite2D) -> Vector2
+func get_sprite_dimensions(sprite: Sprite2D) -> Vector2
 
-get_png_rect_from_texture(texture: Texture2D) -> Rect2i
-
+func get_png_rect_from_texture(texture: Texture2D) -> Rect2i
 ```
