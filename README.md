@@ -86,6 +86,30 @@
       - [SavedGame](#savedgame)
       - [How to save](#how-to-save)
     - [SettingsManager](#settingsmanager)
+- [Components 🧩](#components-)
+  - [Finite state machine 🔁](#finite-state-machine-)
+    - [MachineState](#machinestate)
+    - [Accessible properties](#accessible-properties)
+    - [Signals available](#signals-available)
+    - [Recipe to add a new finite state machine](#recipe-to-add-a-new-finite-state-machine)
+    - [Change to another state](#change-to-another-state)
+    - [Creating transitions between states](#creating-transitions-between-states)
+    - [Register a new transition](#register-a-new-transition)
+    - [Lock or Unlock 🔒](#lock-or-unlock-)
+- [Loot (Lootie) 💰](#loot-lootie-)
+  - [Creating a new loot table.](#creating-a-new-loot-table)
+    - [LootTableData](#loottabledata)
+    - [LootItem](#lootitem)
+    - [LootItemWeight](#lootitemweight)
+    - [LootItemRarity](#lootitemrarity)
+    - [LootItemChance](#lootitemchance)
+  - [Adding items to a LootieTable](#adding-items-to-a-lootietable)
+  - [Generating loot 🎲](#generating-loot-)
+    - [Using Weight mode](#using-weight-mode)
+    - [Using RollTier mode](#using-rolltier-mode)
+    - [Using PercentageChance](#using-percentagechance)
+    - [Using Combined](#using-combined)
+  - [Dice roller 🎲](#dice-roller-)
 - [Utilities 🧰](#utilities-)
   - [Collisions 💥](#collisions-)
   - [Color 🎨](#color-)
@@ -1278,6 +1302,513 @@ saved_game.write_savegame()
 ```
 
 ### SettingsManager
+
+# Components 🧩
+
+## Finite state machine 🔁
+
+Finite state machines (FSMs) empower you to create intricate behaviors in a modular way. Each state can be defined independently, allowing for data sharing, state transitions, and more.
+
+As an essential tool in game development, mastering FSMs will give you a significant edge.
+
+---
+
+**Features:**
+
+- **Conditional Transitions:** Define conditions that determine when a state changes. You can also execute background behaviors during transitions.
+- **State History Tracking (Optional):** Maintain a stack of previous states, providing valuable context for complex behaviors.
+- **Node-Based Structure:** Aligned with Godot's philosophy, states are added in a hierarchical node structure.
+- **State Machine Locking:** Lock or unlock the state machine as needed to control its behavior.
+
+---
+
+### MachineState
+
+States are designed to be extensible, allowing you to override specific behaviors. Each state has access to its parent finite state machine, facilitating communication and data sharing.
+
+```swift
+class_name MachineState extends Node
+
+// This signals are emitted automatically when the FSM change states
+signal entered
+signal finished(next_state)
+
+var FSM: FiniteStateMachine
+
+// This functions only executes once when the state it's ready on the finite state machine. This is the place
+// where the FSM also it's initialized.
+func ready() -> void:
+	pass
+
+// This function executes when the state enters as current state
+func _enter() -> void:
+	pass
+
+
+// This function executes when the state exits from being the current state and transitions to the next one.
+func _exit(_next_state: MachineState) -> void:
+	pass
+
+// In case you want to customize how this state handle the inputs in your game this is the place to do that.
+func handle_input(_event: InputEvent):
+	pass
+
+// This function executes on each frame of the finite state machine's physic process
+func physics_update(_delta: float):
+	pass
+
+// This function executes on each frame of the finite state machine's process
+func update(_delta: float):
+	pass
+```
+
+### Accessible properties
+
+```swift
+@export var current_state: MachineState
+@export var enable_stack: bool = true
+@export var stack_capacity: int = 3
+@export var flush_stack_when_reach_capacity: bool = false
+
+
+// The current states in the form of Dictionary[string, MachineState]
+// {"Idle": Idle}
+var states: Dictionary = {}
+
+// The transitions setup for this state machine in the form of Dictionary[string, MachineTransition]
+// {"IdleToWalkTransition", IdleToWalkTransition}
+var transitions: Dictionary = {}
+
+var states_stack: Array[MachineState] = [] // The history of previous states this machine has been through
+var is_transitioning: bool = false // If the machine it's currently transitioning to another state (mostly used internaly)
+var locked: bool = false // If the machine it's locked so no state changes can be done
+```
+
+### Signals available
+
+```swift
+// When all the states from the node are initialized
+states_initialized(states: Dictionary)
+
+// When current state it's changed to a new one
+state_changed(from_state: MachineState, state: MachineState)
+
+// If the state change failed for a reason
+state_change_failed(from: MachineState, to: MachineState)
+
+// If a new state joins the history stack
+stack_pushed(new_state: MachineState, stack: Array[MachineState])
+
+// If the history stack it's flushed and has remained empty
+stack_flushed(stack: Array[MachineState])
+```
+
+### Recipe to add a new finite state machine
+
+1. Add the finite state machine to the scene tree
+2. Create an initial state that extends from `MachineState`
+3. Add a new state node to the tree as a child
+4. Set an initial state for the `FSM` in the exported variable
+5. Enable or disable the `stack` which maintains the history of previous states
+
+---
+
+![node_search](images/finite_node_search.png)
+
+---
+
+![current_state](images/initial_state.png)
+
+---
+
+As you can see in the next image, the state nodes can can be anywhere on the tree without having to be a direct child. This allows you to create a better visualisation of the nodes:
+
+![fsm_example](images/fsm_example.png)
+
+### Change to another state
+
+The `FSM` node that can be accesed from any state allows you to do the more important feature on a finite state machine, **change to a new state**
+
+```swift
+// Use the state name
+FSM.change_state_to("Walk")
+
+// Or use the state class
+FSM.change_state_to(Walk)
+
+// Pass parameters as dictionary to the new state transition
+FSM.change_state_to(Walk, {"speed_boost": 1.5})
+
+```
+
+```swift
+class_name Idle extends MachineState
+
+@export var player: CharacterBody2D
+
+
+func physics_update(delta):
+
+	if not actor.input_direction.is_zero_approx():
+		FSM.change_state_to(Walk) // Or FSM.change_state_to("Walk")
+
+```
+
+### Creating transitions between states
+
+This `FSM` allows you to create transitions that will be applied between states and can decide if the transition is done or not. This is the way where the parameters are obtained and passed on to the states as properties.
+
+**⚠️ States as such do not have access to the parameter dictionary**, instead, it is better to use them in the transition and assign them as expected properties to these states.
+
+```swift
+class_name MachineTransition
+
+var from_state: MachineState
+var to_state: MachineState
+
+var parameters: Dictionary = {}
+
+
+func should_transition() -> bool:
+	return true
+
+func on_transition():
+	pass
+```
+
+### Register a new transition
+
+For the machine to be aware of them, **these transitions need to be recorded**. The transition class needs to have the name in the form of `{FromState}To{NewState}Transition`.
+
+**If you need to apply a transition every time** you change to a specific state you can use the word `Any`, `AnyTo{NewState}Transition`
+
+This is how it is done:
+
+```swift
+// Create a new custom transition for your use case
+
+class_name WalkToRunTransition extends MachineTransition
+
+func should_transition() -> bool:
+	if from_state is Walk and to_state is Run:
+		return from_state.actor.run and from_state.catching_breath_timer.is_stopped()
+
+	return false
+
+
+// Register the transition in the script or scene you have access the state machine
+class_name FirstPersonController extends CharacterBody3D
+
+@onready var finite_state_machine: FiniteStateMachine = $FiniteStateMachine
+
+// ...
+
+func _ready() -> void:
+	// ...
+
+	finite_state_machine.register_transition(WalkToRunTransition.new())
+	// Or you can register multiple transitions at once
+	finite_state_machine.register_transitions([
+		WalkToRunTransition.new(),
+		RunToWalkTransition.new()
+		AnyToJumpTransition.new()
+	])
+
+```
+
+### Lock or Unlock 🔒
+
+The machine can be locked, useful when when you have a manageable character and you don't want him/her to change state when there is a cinematic or interacting with objects.
+
+```swift
+FSM.lock_state_machine()
+FSM.unlock_state_machine()
+```
+
+# Loot (Lootie) 💰
+
+`Lootie` serves as a tool for game developers to define and manage the random generation of loot items within their games. It allows specifying a list of available items with their respective weights or rarity tiers, enabling the generation of loot with controlled probabilities.
+
+The class offers various methods for adding, removing, and manipulating the loot items, along with three primary generation methods: `weight-based`, `roll-tier based` and `chance_based`
+
+## Creating a new loot table.
+
+To create a new table it's simple to add the node in the desired scene via editor:
+
+![lootie_search](images/lootie_table_search.png)
+
+---
+
+![lootie_search](images/lootie_table_node.png)
+
+### LootTableData
+
+This resource allows you to set the parameters for the `LootieTable` needs to generate the loot. As resource it can be reused so you can create it once and save it in your project.
+
+```swift
+class_name LootTableData extends Resource
+
+enum ProbabilityMode {
+	Weight, // The type of probability technique to apply on a loot, weight is the common case and generate random decimals while each time sum the weight of the next item.
+	RollTier, //  The roll tier uses a max roll number and define a number range for each tier.
+	PercentageProbability, // A standard chance based on percentages,
+	WeightRollTierCombined, // The item needs to overcome a weight and roll tier to be looted
+	WeightPercentageCombined, // The item needs to overcome a weight and percentage roll to be looted
+	RollTierPercentageCombined, // The item needs to overcome a roll tier and percentage roll to be looted
+	WeightPercentageRollTierCombined // The items needs to overcome all the probability modes to be looted
+}
+
+// The available items that will be used on a roll for this loot table
+@export var available_items: Array[LootItem] = []
+
+// The probability mode that set the rules to generate items from this table
+@export var probability_mode: ProbabilityMode = ProbabilityMode.Weight
+
+// The type of roll, when this is enabled the roll result will be executed per items instead of one per generation time
+@export var roll_per_item: bool = false
+
+// When this is enabled items can be repeated for multiple rolls on this generation
+@export var allow_duplicates: bool = false
+
+// Max items that this loot table can generate. Set to 0 to disable it and does not apply a limit in the loot generation
+@export var items_limit_per_loot: int = 3
+
+// When this is enabled, the "always drop items" count on the loot limit for this table.
+@export var always_drop_items_count_on_limit: bool = false
+
+// Each time a random number between min_roll_tier and max roll will be generated, based on this result if the number
+// fits on one of the rarity roll ranges, items of this rarity will be picked randomly
+@export var min_roll_tier: float = 0.0
+
+// Each time a random number between min_roll_tier and max roll will be generated, based on this result if the number
+// fits on one of the rarity roll ranges, items of this rarity will be picked randomly
+@export var max_roll_tier: float = 100.0
+
+// The max roll value will be clamped to the maximum that can be found in the items available for this loot table.
+// So if you set this value to 100 and in the items the maximun found it's 80, this last will be used instead of 100
+@export var limit_max_roll_tier_from_available_items: bool = false
+
+// Set to zero to not use it. This has priority over seed_string. Define a seed for this loot table. Doing so will give you deterministic results across runs
+@export var seed_value: int = 0
+
+// Set it to empty to not use it. Define a seed string that will be hashed to use for deterministic results
+@export var seed_string: String = ""
+
+// You can set items when creating this resource via GDScript, it accept an array of Dictionaries that represent an item or the LootItem resource
+// LootTableData.new([...])
+func _init(items: Array[Variant] = []) -> void
+
+```
+
+### LootItem
+
+This is a resource that act as a wrapper for your original items in-game, provides a series of parameters that will be important for the `LootieTable` to perform the calculations and obtain this items.
+
+The `LootieTable` returns this resource in all generations so extracting the item information depends on the logic of your game.
+
+- When the `ProbabilityMode` is set to `Weight` the `LootItemWeight` resource needs to be set
+- When the `ProbabilityMode` is set to `RollTier` the `LootItemRarity` resource needs to be set _(if you want that item to be obtainable by rarity)_
+- When the `ProbabilityMode` is set to `PercentageProbability` the `LootItemChance` resource needs to be set
+- When the `Probability` is any of `Combined` modes, the related resources needs to be set to make this item available in the loot.
+
+This resources aditionally **can be created from a dictionary**, in this case, all values are optional and invalid keys will be ignored. The keys are converted to `snake_case` in the process so a key defined as `"iD"` will still be valid
+
+```swift
+LootItem.create_from({"id": "sword_1", "name": "Sword", "weight": LootItem.Weight.new(5.5) })
+LootItem.create_from({"iD": "potion", "rarity": LootItemRarity.new(LootItemRarity.ItemRarity.Common, 0, 50) })
+```
+
+---
+
+```swift
+class_name LootItem extends Resource
+
+// Unique identifier for this item
+@export var id: String = ""
+
+// An optional file path that represents this item
+@export_file var file
+
+// An optional scene that represents this item
+@export var scene: PackedScene
+
+// The name of the item
+@export var name : String
+
+// A shortcut to display the name in short form for limited ui in screen
+@export var abbreviation : String
+
+// A description more detailed about this item
+@export_multiline var description : String
+
+// Indicates whether this item should drop every time a loot is requested or not.
+@export var should_drop_always: bool = false
+
+// When enabled the item is eligible on loot generations
+@export var is_enabled: bool = true
+
+// The item is removed from the loot table when looted
+@export var is_unique: bool = false
+
+// The weight parameters for this item
+@export var weight: LootItemWeight
+
+// The grade of rarity for this item
+@export var rarity: LootItemRarity
+
+// The chance percentage for this item
+@export var chance: LootItemChance
+
+```
+
+### LootItemWeight
+
+This is a simple resource that holds a value for the weight of this item. The higher the `weight` value, the more likely it is to come out. The `accum_weight` variable is used internally by the loot table for the related calculations, **It is recommended not to manipulate it**
+
+```swift
+class_name LootItemWeight extends Resource
+
+// The weight value for this items to appear in a loot, the more the weight, more the chance to be looted
+@export var value: float = 1.0
+
+var accum_weight: float = 0.0
+```
+
+### LootItemRarity
+
+This is a simple resource to set the rules for the rarity of an item. The `min_roll` and `max_roll` is the range where this item can be obtained when the LootieTable makes a roll and generates a random value. This will be explained later but simply if it is between the `min_roll = 1` and `max_roll= 5`, a result of `3.5` would be valid to obtain this item and a `5.1` would not.
+
+```swift
+class_name LootItemRarity extends Resource
+
+// Expand here as to adjust it to your game requirements
+enum ItemRarity { COMMON, UNCOMMON, RARE, EPIC, LEGENDARY, MYTHIC, ETERNAL, ABYSSAL, COSMIC, DIVINE}
+
+// The rarity definition
+@export var rarity: ItemRarity = ItemRarity.COMMON
+
+// The minimum value in range to be available on the roll pick
+@export var min_roll: float
+
+// The maximum value in range to be available on the roll pick
+@export var max_roll: float
+```
+
+### LootItemChance
+
+This is a simple resource that holds a percentage value between `0` and `1.0` and a `deviation` that could increase or decrease the chance in a roll.
+
+```swift
+class_name LootItemChance extends Resource
+
+// Set to zero to disable it. Chance in percentage to appear in a loot from 0 to 1.0, where 0.05 means 5% and 1.0 means 100%
+@export_range(0.0, 1.0, 0.001) var value: float = 0.0
+
+// A deviation to alter the results of this item by making it easier (-) or more difficult (+).
+@export_range(-1.0, 1.0, 0.001) var deviation: float = 0.0
+
+```
+
+## Adding items to a LootieTable
+
+This operation can be done **from the editor** or via script
+
+**_From the editor:_**
+
+![add_loot_item_editor](images/add_loot_item.png)
+
+---
+
+**_From a script_**:
+
+```swift
+extends Node
+
+@onready var lootie_table: LootieTable = $LootieTable
+
+func _ready() -> void:
+	// Multiple items at once
+	lootie_table.add_items([LootItem.new(...), LootItem.new(...), LootItem.new(...)])
+
+	// Individually
+	lootie_table.add_item(LootItem.new(...))
+
+	// The not recommended way to add new items
+	lootie_table.loot_table_data.available_items.append(LootItem.new(...))
+	lootie_table.loot_table_data.available_items.append_array([LootItem.new(...), LootItem.new(...), LootItem.new(...)])
+
+	//Remove items by passing an Array of resources or ids
+	lootie_table.remove_items([LootItem1, LootItem2])
+	lootie_table.remove_items_by_id("sword_1", "basic_potion")
+
+	//Remove item by passing the resource or the id
+	lootie_table.remove_item(LootItem)
+	lootie_table.remove_item_by_id("sword_1")
+```
+
+## Generating loot 🎲
+
+The function `generate(times: int = 1)` it's the only thing you need, it accepts a number of `times` to roll.
+
+The `LootieTable` uses the `LootTableData` that it uses as rules to generate loot based on the selected mode, **depending on your rules** it is possible for a roll **to return an empty array.** To avoid this you can set to true the variable `should_drop_always` in the items you want to always be looted.
+
+```swift
+var items_rolled: Array[LootItem] = lootie_table.generate() // Roll times set on default value
+// Or
+var items_rolled: Array[LootItem] = lootie_table.generate(10) // Roll 10 times so they are more chances to appear items in the loot
+
+// You can change the probability type before rolling again
+lootie_table.change_probability_type(LootTableData.ProbabilityMode.RollTier)
+
+var items_rolled: Array[LootItem] = lootie_table.generate(3)
+
+```
+
+### Using Weight mode
+
+`weight` needs to be greater than zero on each `LootItem` to be valid for this roll
+
+This method iterates through the available items, calculating their accumulative weights and randomly selecting items based on the accumulated weight values. It repeats this process for the specified `times` parameter, potentially returning up to `items_limit_per_loot` items while considering the `allow_duplicates` flag.
+
+**The more the weight of the item, the more chances to appear in the loot**.
+
+You can set the `extra_weight_bias` to increase the difficulty to generate the loot using `weight_mode`, this could be used to start with a high value and decrease it as the player progresses through the game e.g.
+
+### Using RollTier mode
+
+**The items needs to have a `LootItemRarity` set to be valid for this roll**
+
+This method generates random numbers within the specified `max_roll` range and compares them to the defined rarity tiers of the available items. Based on the roll results, it randomly selects items corresponding to the matching rarity tiers, repeating for the specified times parameter and potentially returning up to `items_limit_per_loot` while considering the `allow_duplicates` flag
+
+As you notice in `LootItemRarity` there are two properties that works as a range:
+
+- `min_roll`: The minimum roll value to be valid as posibly generated
+- `max_roll`: The maximum roll value to be valid as posibly generated.
+
+So if my item has a `min_roll` of 5 and `max_roll` of 20. Only values between 5 and 20 in each roll tier generation will be valid to return this item.
+
+Higher roll ranges for an item in `roll_tier` generations means more probabilities to be returned.
+
+Imagine I defined a `LootTable` with a `max_roll` of 100, so in each generation a random number between 0-100 will be randomly calculated. If the number is 7.55, items where this number falls within the valid range will be candidates for return.
+
+### Using PercentageChance
+
+**The items needs to have a `LootItemChance` set to be valid for this roll**
+
+This method uses `randf()` to generate a value between 0 and 1.0. If this value after applying the `deviation` is below the chance value for the item, it will go into the loot.
+
+- Higher chance value for an item means more probabilities to be returned.
+- A deviation to alter the results of this item by making it easier (-) or more difficult (+).
+
+### Using Combined
+
+Any method with the `Combined` suffix will apply the same algorithms explained above but in this case the item must pass all the rolls in the combined methods.
+
+So for example if `WeightRollTierCombined` is selected, the item must overcome a `weight` and a `roll tier` roll to appear in the loot.
+
+**Note that items that are valid for these combined methods must have the related resources created in the `LootItem`**
+
+## Dice roller 🎲
 
 # Utilities 🧰
 
