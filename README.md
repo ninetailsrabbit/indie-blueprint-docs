@@ -79,6 +79,13 @@
     - [Configurable parameters](#configurable-parameters)
     - [Information](#information)
     - [How to use](#how-to-use-2)
+  - [Persistence 💾](#persistence-)
+    - [SaveManager](#savemanager)
+      - [Signals](#signals-4)
+      - [Methods](#methods-2)
+      - [SavedGame](#savedgame)
+      - [How to save](#how-to-save)
+    - [SettingsManager](#settingsmanager)
 - [Utilities 🧰](#utilities-)
   - [Collisions 💥](#collisions-)
   - [Color 🎨](#color-)
@@ -98,7 +105,7 @@
       - [Example of use](#example-of-use)
   - [Math 🧮](#math-)
     - [Constants](#constants)
-    - [Methods](#methods-2)
+    - [Methods](#methods-3)
   - [BitStream 💠](#bitstream-)
   - [VelocityHelper 👟](#velocityhelper-)
   - [Network 📶](#network-)
@@ -116,11 +123,11 @@
   - [Label 🏷️](#label-️)
   - [String 🔤](#string-)
     - [Constants](#constants-1)
-    - [Methods](#methods-3)
-  - [Time](#time)
-  - [Camera2D](#camera2d)
-  - [Camera3D](#camera3d)
-  - [Texture](#texture)
+    - [Methods](#methods-4)
+  - [Time ⏳](#time-)
+  - [Camera2D 🎥](#camera2d-)
+  - [Camera3D 🎥](#camera3d-)
+  - [Texture 🖼️](#texture-️)
 
 # Other plugins 🎫
 
@@ -1159,6 +1166,118 @@ func change_hour_to(new_hour: int) -> void
 
 func change_minute_to(new_minute: int) -> void
 ```
+
+## Persistence 💾
+
+### SaveManager
+
+The SaveManager provides a convenient way to manage save files in your Godot project. It leverages the `SavedGame` resource, which can be extended for your specific game data.
+
+- **Multiple Save File Support:** Load and manage multiple save files stored in the user's game directory.
+- **Customizable SavedGame Resource:** The SavedGame resource acts as a container for your game data and can be extended with your own logic.
+- **Simple Saving:** Easily save game data using the `write_savegame` method on a newly created SavedGame resource.
+- **Efficient Loading:** Load previously saved games using the SaveManager's functionality.
+- **File format:** Use `.tres` format when detects that the current build is a debug build or `.res` if not.
+
+There are 2 operations that the `SaveManager` always does.
+
+- Load the save files when ready
+- Write the current save game when the game is closed.
+
+```swift
+
+// Load saved games in _ready
+func _ready() -> void:
+	list_of_saved_games.merge(read_user_saved_games(), true)
+
+
+//Write the current save game when close
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		if current_saved_game:
+			current_saved_game.write_savegame()
+```
+
+#### Signals
+
+```swift
+created_savegame(saved_game: SavedGame)
+loaded_savegame(saved_game: SavedGame)
+removed_saved_game(saved_game: SavedGame)
+
+error_creating_savegame(filename: String, error: Error)
+error_loading_savegame(filename: String, error: Error)
+error_removing_savegame(filename: String, error: Error)
+```
+
+#### Methods
+
+```swift
+// Dictionary<String, SavedGame>
+@export var list_of_saved_games: Dictionary = {}
+@export var current_saved_game: SavedGame
+
+
+func make_current(saved_game: SavedGame) -> void
+
+func create_new_save(filename: String, make_it_as_current: bool = false)
+
+func load_savegame(filename: String) -> SavedGame
+
+func remove(filename: String)
+
+func read_user_saved_games() -> Dictionary
+
+func saved_game_exists(saved_game: SavedGame) -> bool
+
+func save_filename_exists(filename: String) -> bool
+```
+
+#### SavedGame
+
+This is the Resource that represents a save game in your project. Here is where you add new properties to save, the advantage of using resources is that it supports most types as well as being able to nest other resources.
+
+**_The dates are automatically updated in each write_**
+
+```swift
+class_name SavedGame extends Resource
+
+static var default_path: String = OS.get_user_data_dir()
+
+@export var filename: String
+@export var display_name: String
+@export var version_control: String = ProjectSettings.get_setting("application/config/version", "1.0.0")
+@export var engine_version: String = "Godot %s" % Engine.get_version_info().string
+@export var device: String = OS.get_distribution_name()
+@export var platform: String = OS.get_name()
+@export var last_datetime: String = ""
+@export var timestamp: float
+
+// Write or update this resource with the filename provided.
+// The filename is only needed in when it is first created
+func write_savegame(new_filename: String = filename) -> Error
+
+// This remove the resource file from the system is irreversible so be sure to use confirmation prompts in your UI before performing this action.
+func delete()
+```
+
+#### How to save
+
+Here's a simplified example of saving a game:
+
+```swift
+var saved_game = SavedGame.new()
+saved_game.write_savegame("my_game_save") // The filename needs to be provided only in the first creation
+
+// Updating content
+saved_game.game_settings = updated_settings
+saved_game.highscore = 10000
+
+// The write_savegame method automatically creates the save file within the user's game directory.
+saved_game.write_savegame()
+```
+
+### SettingsManager
 
 # Utilities 🧰
 
@@ -2549,7 +2668,7 @@ bars(3) // "███"
 bars(3, " ") // "█ █ █"
 ```
 
-## Time
+## Time ⏳
 
 The `TimeHelper` class provides useful methods to manipulate the time in-game.
 
@@ -2608,7 +2727,7 @@ func create_physics_timer(wait_time: float = 1.0, autostart: bool = false, one_s
 
 ```
 
-## Camera2D
+## Camera2D 🎥
 
 The `Camera2DHelper` provides useful methods to manipulate and obtain information from 2D cameras
 
@@ -2617,7 +2736,7 @@ The `Camera2DHelper` provides useful methods to manipulate and obtain informatio
 func get_panning_camera_position(camera: Camera2D) -> Vector2
 ```
 
-## Camera3D
+## Camera3D 🎥
 
 The `Camera3DHelper` provides useful methods to manipulate and obtain information from 3D cameras
 
@@ -2631,7 +2750,7 @@ func forward_direction(camera: Camera3D) -> Vector3
 func is_facing_camera(camera: Camera3D, node: Node) -> bool
 ```
 
-## Texture
+## Texture 🖼️
 
 The `TextureHelper` provides useful methods to manipulate and obtain information from textures and sprites.
 
