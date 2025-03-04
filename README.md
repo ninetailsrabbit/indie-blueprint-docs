@@ -48,6 +48,10 @@
     - [Methods](#methods)
   - [Persistence 💾](#persistence-)
     - [SettingsManager](#settingsmanager)
+      - [Game settings](#game-settings)
+    - [Signals](#signals)
+    - [Properties](#properties)
+    - [Update a config section](#update-a-config-section)
 - [Components 🧩](#components-)
 
 # Other plugins 🎫
@@ -61,6 +65,12 @@
 ---
 
 # Create a new repository from template 📘
+
+To better understand what branch to choose from for which Godot version, please refer to this table:
+|Godot Version|indie-blueprint-save Branch|indie-blueprint-save Version|
+|---|---|--|
+|[![GodotEngine](https://img.shields.io/badge/Godot_4.3.x_stable-blue?logo=godotengine&logoColor=white)](https://godotengine.org/)|`4.3`|`1.x`|
+|[![GodotEngine](https://img.shields.io/badge/Godot_4.4.x_stable-blue?logo=godotengine&logoColor=white)](https://godotengine.org/)|`main`|`1.x`|
 
 Go to the [template](https://github.com/ninetailsrabbit/indie-blueprint) and create a new repository from it
 
@@ -76,13 +86,13 @@ This template contains fully functional modules individually. They can be disabl
 
 General utilities that does not belongs to a particular place and are sed as static classes that can be accessed at any time even if they are not in the scene tree.
 
+[Read the documentation](https://github.com/ninetailsrabbit/indie-blueprint-toolbox)
+
 ## Audio
 
 Easily control game audio with features like volume adjustments, playlists, crossfading, and sound pools.
 
 [Read the documentation](https://github.com/ninetailsrabbit/indie-blueprint-audio)
-
-[Read the documentation](https://github.com/ninetailsrabbit/indie-blueprint-toolbox)
 
 ## Camera transition
 
@@ -371,5 +381,169 @@ func current_controller_is_switch_joycon_left() -> bool
 ## Persistence 💾
 
 ### SettingsManager
+
+This template already has an easily expandable default configuration. This configuration is saved in an `.ini` or `.cfg` file according to your choice.
+
+In principle this autoload works automatically and saves and loads the configuration of each game both on entry and exit.
+
+#### Game settings
+
+The options are defined in the `IndieBlueprintGameSettings` file where each setting name is defined as a constant and its default value is added to the dictionary.
+
+```swift
+class_name IndieBlueprintGameSettings
+
+// ConfigFile sections
+const KeybindingsSection: StringName = &"keybindings"
+const GraphicsSection: StringName = &"graphics"
+const AudioSection: StringName = &"audio"
+const ControlsSection: StringName = &"controls"
+const AccessibilitySection: StringName = &"accessibility"
+const LocalizationSection: StringName = &"localization"
+const AnalyticsSection: StringName = &"analytics"
+
+
+// Setting properties
+//This settings are used as keys for the configuration file .ini or .cfg
+
+const FpsCounterSetting: StringName = &"fps_counter"
+const MaxFpsSetting: StringName = &"max_fps"
+const WindowDisplaySetting: StringName = &"display"
+const WindowDisplayBorderlessSetting: StringName = &"borderless"
+const WindowResolutionSetting: StringName = &"resolution"
+const IntegerScalingSetting: StringName = &"integer_scaling"
+const VsyncSetting: StringName = &"vsync"
+const Scaling3DMode: StringName = &"scaling_3d_mode"
+const Scaling3DValue: StringName = &"scaling_3d_value"
+const QualityPresetSetting: StringName = &"quality_preset"
+
+const MouseSensivitySetting: StringName = &"mouse_sensitivity"
+const ReversedMouseSetting: StringName = &"reversed_mouse"
+const ControllerVibrationSetting: StringName = &"controller_vibration"
+
+const ScreenBrightnessSetting: StringName = &"screen_brightness"
+const PhotosensitivitySetting: StringName = &"photosensitive"
+const ScreenShakeSetting: StringName = &"screenshake"
+const DaltonismSetting: StringName = &"daltonism"
+
+const AllowTelemetrySetting: StringName = &"allow_telemetry"
+
+const CurrentLanguageSetting: String = "current_language"
+const VoicesLanguageSetting: String = "voices_language"
+const SubtitlesLanguageSetting: String = "subtitles_language"
+const SubtitlesEnabledSetting: StringName = &"subtitles"
+
+const MutedAudioSetting: StringName = &"muted"
+
+const DefaultInputMapActionsSetting: StringName = &"default_input_map_actions"
+
+
+// Default settings
+static var DefaultSettings: Dictionary = {
+	IndieBlueprintGameSettings.MutedAudioSetting: false,
+	IndieBlueprintGameSettings.FpsCounterSetting: false,
+	IndieBlueprintGameSettings.MaxFpsSetting: 0,
+	IndieBlueprintGameSettings.WindowDisplaySetting: DisplayServer.window_get_mode(),
+	IndieBlueprintGameSettings.WindowResolutionSetting: DisplayServer.window_get_size(),
+	IndieBlueprintGameSettings.WindowDisplayBorderlessSetting: DisplayServer.window_get_flag(DisplayServer.WINDOW_FLAG_BORDERLESS),
+	IndieBlueprintGameSettings.IntegerScalingSetting: 1 if ProjectSettings.get_setting("display/window/stretch/scale_mode") == "integer" else 0,
+	IndieBlueprintGameSettings.VsyncSetting:  DisplayServer.window_get_vsync_mode(),
+	IndieBlueprintGameSettings.Scaling3DMode: Viewport.SCALING_3D_MODE_BILINEAR,
+	IndieBlueprintGameSettings.Scaling3DValue: 1.0,
+	IndieBlueprintGameSettings.QualityPresetSetting: IndieBlueprintHardwareDetector.auto_discover_graphics_quality(),
+	IndieBlueprintGameSettings.MouseSensivitySetting: 3.0,
+	IndieBlueprintGameSettings.ReversedMouseSetting: false,
+	IndieBlueprintGameSettings.ControllerVibrationSetting: true,
+	IndieBlueprintGameSettings.ScreenBrightnessSetting: 1.0,
+	IndieBlueprintGameSettings.PhotosensitivitySetting: false,
+	IndieBlueprintGameSettings.ScreenShakeSetting: true,
+	IndieBlueprintGameSettings.DaltonismSetting: IndieBlueprintWindowManager.DaltonismTypes.No,
+	IndieBlueprintGameSettings.CurrentLanguageSetting: TranslationServer.get_locale(),
+	IndieBlueprintGameSettings.VoicesLanguageSetting: TranslationServer.get_locale(),
+	IndieBlueprintGameSettings.SubtitlesLanguageSetting: TranslationServer.get_locale(),
+	IndieBlueprintGameSettings.SubtitlesEnabledSetting: false,
+	IndieBlueprintGameSettings.AllowTelemetrySetting: false,
+	// Dictionary[StringName, Array[InputEvent]
+	IndieBlueprintGameSettings.DefaultInputMapActionsSetting: {}
+}
+
+static var FpsLimits: Array[int] = [0, 30, 60, 90, 144, 240, 300]
+```
+
+### Signals
+
+```swift
+reset_to_default_settings
+
+created_settings
+
+loaded_settings
+
+removed_setting_file
+
+updated_setting_section(section: String, key: String, value: Variant)
+```
+
+### Properties
+
+```swift
+// The file path where the settings file will be saved
+var settings_file_path: String = OS.get_user_data_dir() + "/settings.%s" % FileFormat
+
+// When enabled, the file it's encrypted
+var use_encription: bool = false
+
+// When enabled, it includes the ui_ actions that comes by default in Godot
+var include_ui_keybindings: bool = false
+
+// When enabled, load the settings automatically when the node is ready
+var load_on_start: bool = true
+```
+
+### Update a config section
+
+To update the value of an option you must know in which section it is stored and what type of value it is.
+
+By default, this template provides you the following sections in the `IndieBlueprintGameSettings` file:
+
+```swift
+class_name IndieBlueprintGameSettings
+
+const KeybindingsSection: StringName = &"keybindings"
+const GraphicsSection: StringName = &"graphics"
+const AudioSection: StringName = &"audio"
+const ControlsSection: StringName = &"controls"
+const AccessibilitySection: StringName = &"accessibility"
+const LocalizationSection: StringName = &"localization"
+const AnalyticsSection: StringName = &"analytics"
+```
+
+In the `SettingsManager` there are functions to directly update one of these sections by default
+
+```swift
+func update_audio_section(key: String, value: Variant) -> void
+
+func update_keybindings_section(key: String, value: Variant) -> void
+
+func update_graphics_section(key: String, value: Variant) -> void
+
+func update_accessibility_section(key: String, value: Variant) -> void
+
+func update_controls_section(key: String, value: Variant) -> void
+
+func update_analytics_section(key: String, value: Variant) -> void
+
+func update_localization_section(key: String, value: Variant) -> void
+
+
+// Example updating volume value from a slider
+
+func audio_slider_drag_ended(volume_changed: bool):
+	if volume_changed:
+		IndieBlueprintAudioManager.change_volume(target_bus, value)
+
+		IndieBlueprintSettingsManager.update_audio_section(IndieBlueprintAudioManager.MusicBus, value) // Here is where the setting is updated
+
+```
 
 # Components 🧩
